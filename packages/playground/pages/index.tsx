@@ -25,6 +25,25 @@ const App: React.FC = () => {
               </NavigationAnchor>
             </td>
           </tr>
+          {toggle && (
+            <tr>
+              <td>
+                <NavigationAnchor>
+                  <a href="">test new</a>
+                </NavigationAnchor>
+              </td>
+              <td>
+                <NavigationAnchor>
+                  <a href="">test new</a>
+                </NavigationAnchor>
+              </td>
+              <td>
+                <NavigationAnchor>
+                  <a href="">test new</a>
+                </NavigationAnchor>
+              </td>
+            </tr>
+          )}
           <tr>
             <td>
               <NavigationAnchor>
@@ -43,15 +62,6 @@ const App: React.FC = () => {
               </NavigationAnchor>
             </td>
           </tr>
-          {toggle && (
-            <tr>
-              <td>
-                <NavigationAnchor>
-                  <a href="">test odd</a>
-                </NavigationAnchor>
-              </td>
-            </tr>
-          )}
         </tbody>
       </table>
     </>

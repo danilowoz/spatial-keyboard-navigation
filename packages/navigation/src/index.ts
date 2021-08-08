@@ -1,4 +1,5 @@
-type Position = Record<"x" | "y", number>;
+type Position = Record<"x" | "y" | "width" | "height", number>;
+type TailHead = Record<"x" | "y", number>;
 
 class Unit {
   position: Position;
@@ -11,33 +12,48 @@ class Unit {
 }
 
 class Column {
-  row: Unit[] = [];
+  items: Unit[] = [];
 
-  tail = 0;
-  head = 0;
+  head: TailHead = { x: 0, y: 0 };
+  tail: TailHead = { x: 0, y: 0 };
 
   add(unit: Unit): void {
-    if (this.row.length === 0) {
-      this.row = [unit];
-      this.tail = unit.position.x;
-      this.head = unit.position.x;
+    if (this.items.length === 0) {
+      this.items = [unit];
+
+      this.head = unit.position;
+      this.tail = {
+        x: unit.position.x + unit.position.width,
+        y: unit.position.y + unit.position.height,
+      };
 
       return;
     }
 
-    const fitIndex = this.row.findIndex((row) => {
-      return this.tail >= row.position.y && this.head <= row.position.y;
+    const fitIndex = this.items.findIndex((item) => {
+      return item.position.y >= this.head.y && item.position.y <= this.tail.y;
     });
 
-    if (fitIndex === -1) {
-      this.head = unit.position.x;
-      this.row = [...this.row, unit];
+    // Add head
+    if (unit.position.y < this.items[0].position.y) {
+      this.items = [unit, ...this.items];
+      this.head = unit.position;
+
+      // Add tail
+    } else if (unit.position.y > this.items[this.items.length - 1].position.y) {
+      this.items = [...this.items, unit];
+      this.tail = {
+        x: unit.position.x + unit.position.width,
+        y: unit.position.y + unit.position.height,
+      };
+
+      return;
     } else {
-      this.row = this.row.reduce((acc, curr, index) => {
+      // Add middle
+      this.items = this.items.reduce((acc, curr, index) => {
         acc.push(curr);
 
         if (fitIndex === index) {
-          this.tail = unit.position.x;
           acc.push(unit);
         }
 
@@ -49,15 +65,18 @@ class Column {
 
 class Navigation {
   private items: Column[] = [];
-  private cacheItems: Unit[] = [];
+  private cacheItems: HTMLElement[] = [];
 
-  private getPosition(node: HTMLElement): Record<"x" | "y", number> {
-    const { x, y } = node.getBoundingClientRect();
+  private getPosition(node: HTMLElement): Position {
+    const { x, y, width, height } = node.getBoundingClientRect();
 
-    return { x, y };
+    return { x, y, width, height };
   }
 
-  private addToItems(unit: Unit) {
+  private addToItems(node: HTMLElement) {
+    const position = this.getPosition(node);
+    const unit = new Unit(node, position);
+
     if (this.items.length === 0) {
       const column = new Column();
       column.add(unit);
@@ -70,7 +89,7 @@ class Navigation {
     const fitIndex = this.items.findIndex((column) => {
       const { tail, head } = column;
 
-      return unit.position.x >= head && unit.position.x <= tail;
+      return unit.position.x >= head.x && unit.position.x <= tail.x;
     });
 
     if (fitIndex > -1) {
@@ -82,10 +101,10 @@ class Navigation {
     column.add(unit);
 
     // Add head
-    if (unit.position.x < this.items[0].head) {
+    if (unit.position.x < this.items[0].head.x) {
       this.items = [column, ...this.items];
       // Add tail
-    } else if (unit.position.x > this.items[this.items.length - 1].tail) {
+    } else if (unit.position.x > this.items[this.items.length - 1].tail.x) {
       this.items = [...this.items, column];
     }
   }
@@ -93,23 +112,20 @@ class Navigation {
   public repositionAll() {
     this.items = [];
 
-    this.cacheItems.forEach((unit) => {
-      this.addToItems(unit);
+    this.cacheItems.forEach((node) => {
+      this.addToItems(node);
     });
 
     this.log();
   }
 
   public add(node: HTMLElement): () => void {
-    const position = this.getPosition(node);
-    const unit = new Unit(node, position);
-
-    this.cacheItems.push(unit);
+    this.cacheItems.push(node);
     this.repositionAll();
 
     const removeItem = () => {
       this.cacheItems = this.cacheItems.filter(
-        (cacheNode) => cacheNode.node !== node
+        (cacheNode) => cacheNode !== node
       );
       this.repositionAll();
     };
