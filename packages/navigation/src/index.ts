@@ -11,29 +11,29 @@ class Unit {
 }
 
 class Column {
-  items: Unit[] = [];
+  row: Unit[] = [];
 
   tail = 0;
   head = 0;
 
   add(unit: Unit): void {
-    if (this.items.length === 0) {
-      this.items = [unit];
+    if (this.row.length === 0) {
+      this.row = [unit];
       this.tail = unit.position.x;
       this.head = unit.position.x;
 
       return;
     }
 
-    const fitIndex = this.items.findIndex((row) => {
+    const fitIndex = this.row.findIndex((row) => {
       return this.tail >= row.position.y && this.head <= row.position.y;
     });
 
     if (fitIndex === -1) {
       this.head = unit.position.x;
-      this.items = [...this.items, unit];
+      this.row = [...this.row, unit];
     } else {
-      this.items = this.items.reduce((acc, curr, index) => {
+      this.row = this.row.reduce((acc, curr, index) => {
         acc.push(curr);
 
         if (fitIndex === index) {
@@ -48,18 +48,16 @@ class Column {
 }
 
 class Navigation {
-  items: Column[] = [];
+  private items: Column[] = [];
+  private cacheItems: Unit[] = [];
 
-  getPosition(node: HTMLElement): Record<"x" | "y", number> {
+  private getPosition(node: HTMLElement): Record<"x" | "y", number> {
     const { x, y } = node.getBoundingClientRect();
 
     return { x, y };
   }
 
-  add(node: HTMLElement): void {
-    const position = this.getPosition(node);
-    const unit = new Unit(node, position);
-
+  private addToItems(unit: Unit) {
     if (this.items.length === 0) {
       const column = new Column();
       column.add(unit);
@@ -72,7 +70,7 @@ class Navigation {
     const fitIndex = this.items.findIndex((column) => {
       const { tail, head } = column;
 
-      return position.x >= head && position.x <= tail;
+      return unit.position.x >= head && unit.position.x <= tail;
     });
 
     if (fitIndex > -1) {
@@ -90,6 +88,37 @@ class Navigation {
     } else if (unit.position.x > this.items[this.items.length - 1].tail) {
       this.items = [...this.items, column];
     }
+  }
+
+  public repositionAll() {
+    this.items = [];
+
+    this.cacheItems.forEach((unit) => {
+      this.addToItems(unit);
+    });
+
+    this.log();
+  }
+
+  public add(node: HTMLElement): () => void {
+    const position = this.getPosition(node);
+    const unit = new Unit(node, position);
+
+    this.cacheItems.push(unit);
+    this.repositionAll();
+
+    const removeItem = () => {
+      this.cacheItems = this.cacheItems.filter(
+        (cacheNode) => cacheNode.node !== node
+      );
+      this.repositionAll();
+    };
+
+    return removeItem;
+  }
+
+  log(): void {
+    console.log(this.items, this.cacheItems);
   }
 }
 

@@ -19,8 +19,12 @@ const NavigationAnchor: FC = ({ children }) => {
     const instance = initNavigation();
 
     if (ref.current) {
-      instance.add(ref.current);
+      const removeItem = instance.add(ref.current);
+
+      return removeItem;
     }
+
+    return () => null;
   }, []);
 
   return Children.map(children, (child) => {
