@@ -1,0 +1,30 @@
+{
+  "name": "navigation-react",
+  "version": "0.0.1",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "prebuild": "yarn run clean",
+    "dev": "yarn tsc -b -w",
+    "build": "yarn tsc -b",
+    "pretest": "yarn run build",
+    "test": "yarn jest",
+    "clean": "yarn rimraf dist *.tsbuildinfo",
+    "lint": "yarn eslint src --ext ts,js,tsx,jsx"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.13.12",
+    "@babel/preset-typescript": "^7.13.0",
+    "@types/jest": "^26.0.22",
+    "@types/react": "^17.0.16",
+    "jest": "^26.6.3",
+    "typescript": "^4.2.3"
+  },
+  "dependencies": {
+    "navigation": "0.0.1",
+    "react": "^17.0.2"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "extends": "../../.eslintrc",
+  "parserOptions": {
+    "project": "packages/playground/tsconfig.json"
+  }
+}
