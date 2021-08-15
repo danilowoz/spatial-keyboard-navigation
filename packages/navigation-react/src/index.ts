@@ -1,4 +1,4 @@
-import { initNavigation } from "navigation";
+import { initDataStructure, initEventListener } from "navigation";
 
 import {
   FC,
@@ -9,6 +9,7 @@ import {
   useRef,
   ReactElement,
 } from "react";
+import React = require("react");
 
 const NavigationAnchor: FC = ({ children }) => {
   const ref = useRef<HTMLElement>();
@@ -16,12 +17,14 @@ const NavigationAnchor: FC = ({ children }) => {
   Children.only(children);
 
   useEffect(() => {
-    const instance = initNavigation();
+    const instance = initDataStructure();
 
     if (ref.current) {
       const removeItem = instance.add(ref.current);
 
-      return removeItem;
+      return () => {
+        removeItem();
+      };
     }
 
     return () => null;
@@ -36,4 +39,18 @@ const NavigationAnchor: FC = ({ children }) => {
   }) as unknown as ReactElement;
 };
 
-export { NavigationAnchor };
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+const NavigationProvider: React.FC = ({ children }) => {
+  useEffect(() => {
+    const remove = initEventListener();
+
+    return () => {
+      remove();
+    };
+  }, []);
+
+  return children;
+};
+
+export { NavigationAnchor, NavigationProvider };

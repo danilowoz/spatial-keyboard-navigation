@@ -1,10 +1,11 @@
-import { NavigationAnchor } from "navigation-react";
+import { NavigationAnchor, NavigationProvider } from "navigation-react";
 import { useState } from "react";
 
 const App: React.FC = () => {
   const [toggle, setToggle] = useState(false);
   return (
-    <>
+    <NavigationProvider>
+      <style>{`.select {color:red}`}</style>
       <button onClick={() => setToggle(!toggle)}>Toggle</button>
       <table>
         <tbody>
@@ -64,7 +65,7 @@ const App: React.FC = () => {
           </tr>
         </tbody>
       </table>
-    </>
+    </NavigationProvider>
   );
 };
 
