@@ -1,12 +1,18 @@
 import { NavigationAnchor, NavigationProvider } from "navigation-react";
 import { useState } from "react";
+import "show-keys";
 
 const App: React.FC = () => {
   const [toggle, setToggle] = useState(false);
   return (
     <NavigationProvider>
-      <style>{`.select {color:red}`}</style>
-      <button onClick={() => setToggle(!toggle)}>Toggle</button>
+      <style>{`*:focus {
+    outline: 2px solid #d71ef7;
+}
+ `}</style>
+      <NavigationAnchor>
+        <button onClick={() => setToggle(!toggle)}>Toggle</button>
+      </NavigationAnchor>
       <table>
         <tbody>
           <tr>

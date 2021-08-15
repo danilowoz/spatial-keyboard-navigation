@@ -9031,6 +9031,11 @@ shellwords@^0.1.1:
   resolved "https://registry.yarnpkg.com/shellwords/-/shellwords-0.1.1.tgz#d6b9181c1a48d397324c84871efbcfc73fc0654b"
   integrity sha512-vFwSUfQvqybiICwZY5+DAWIPLKsWO31Q91JSKl3UYv+K5c2QRPzn0qzec6QPu1Qc9eHYItiP3NdJqNVqetYAww==
 
+show-keys@^1.1.2:
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/show-keys/-/show-keys-1.1.2.tgz#2eeef37cbfe7f99234f33c0e63536e749a29251c"
+  integrity sha512-lAPb8lXfNZxCW9rKD6roiuZtExvK4pN1S0QrddP623kDiLVxkK4Zro5B4oI4RblkG+fZlXoxk68/QsqR6h4bNQ==
+
 side-channel@^1.0.4:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/side-channel/-/side-channel-1.0.4.tgz#efce5c8fdc104ee751b25c58d4290011fa5ea2cf"

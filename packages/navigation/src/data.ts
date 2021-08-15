@@ -18,7 +18,7 @@ class Column {
   tail: TailHead = { x: 0, y: 0 };
 
   findByIndex(index: number): Unit {
-    const indexOrLast = Math.min(index, this.items.length - 1);
+    const indexOrLast = Math.min(Math.max(index, 0), this.items.length - 1);
 
     return this.items[indexOrLast];
   }
@@ -140,24 +140,34 @@ export class DataStructure {
   }
 
   findByIndex(x: number, y: number): Unit {
-    const indexOrLast = Math.min(x, this.items.length - 1);
+    const indexOrLast = Math.min(Math.max(x, 0), this.items.length - 1);
     const column = this.items[indexOrLast];
 
     return column.findByIndex(y);
   }
 
-  findByNode(node: Element): Unit | undefined {
-    let lookUpUnit: Unit | undefined;
+  findByNode(
+    node?: Element | null
+  ): { unit: Unit; indexX: number; indexY: number } | undefined {
+    if (!node) return undefined;
 
-    this.items.forEach((column) => {
-      column.items.forEach((item) => {
+    let unit: Unit | undefined;
+    let indexX = -1;
+    let indexY = -1;
+
+    this.items.forEach((column, itemIndexX) => {
+      column.items.forEach((item, itemIndexY) => {
         if (item.node === node) {
-          lookUpUnit = item;
+          unit = item;
+          indexX = itemIndexX;
+          indexY = itemIndexY;
         }
       });
     });
 
-    return lookUpUnit;
+    if (!unit) return undefined;
+
+    return { unit, indexX, indexY };
   }
 
   log(): void {

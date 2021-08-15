@@ -12,6 +12,7 @@ const initDataStructure = (): DataStructure => {
   return dataStructureInstance;
 };
 
+let lastItemVisited: Element | undefined;
 const initEventListener = (): (() => void) => {
   const handler = ({ key }: { key: string }) => {
     const data = initDataStructure();
@@ -19,16 +20,32 @@ const initEventListener = (): (() => void) => {
 
     switch (key) {
       case "ArrowUp":
-        navigation.goTo(data, Direction.UP);
+        lastItemVisited = navigation.goTo(data, Direction.UP, lastItemVisited);
+
         break;
       case "ArrowRight":
-        navigation.goTo(data, Direction.RIGHT);
+        lastItemVisited = navigation.goTo(
+          data,
+          Direction.RIGHT,
+          lastItemVisited
+        );
+
         break;
       case "ArrowDown":
-        navigation.goTo(data, Direction.DOWN);
+        lastItemVisited = navigation.goTo(
+          data,
+          Direction.DOWN,
+          lastItemVisited
+        );
+
         break;
       case "ArrowLeft":
-        navigation.goTo(data, Direction.LEFT);
+        lastItemVisited = navigation.goTo(
+          data,
+          Direction.LEFT,
+          lastItemVisited
+        );
+
         break;
     }
   };
@@ -36,6 +53,7 @@ const initEventListener = (): (() => void) => {
   window.addEventListener("keydown", handler);
 
   return () => {
+    lastItemVisited = undefined;
     window.removeEventListener("keydown", handler);
   };
 };
