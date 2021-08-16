@@ -12,14 +12,15 @@ import {
 import React = require("react");
 
 const NavigationAnchor: FC = ({ children }) => {
-  const ref = useRef<HTMLElement>();
+  type MaybeButton = HTMLElement & { disabled: boolean };
+  const ref = useRef<MaybeButton>();
 
   Children.only(children);
 
   useEffect(() => {
     const stack = initStack();
 
-    if (ref.current) {
+    if (ref.current && !ref.current.disabled) {
       const removeItem = stack.add(ref.current);
 
       return () => {

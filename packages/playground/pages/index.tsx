@@ -60,7 +60,7 @@ const App: React.FC = () => {
 
             <td>
               <NavigationAnchor>
-                <a href="">test 5</a>
+                <button disabled>test 5</button>
               </NavigationAnchor>
             </td>
             <td>

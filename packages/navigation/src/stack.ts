@@ -36,42 +36,35 @@ class Row {
       return;
     }
 
-    const fitIndex = this.items.findIndex((item) => {
-      return item.position.x >= this.head.x && item.position.x <= this.tail.x;
+    const newItems = [...this.items, unit];
+    this.items = newItems.sort((a, b) => {
+      const sizeA = a.position.x + a.position.width;
+      const sizeB = b.position.x + b.position.width;
+
+      if (sizeA < sizeB) {
+        return -1;
+      }
+
+      if (sizeA > sizeB) {
+        return 1;
+      }
+
+      return 0;
     });
 
-    // Add head
-    if (unit.position.x < this.items[0].position.x) {
-      this.items = [unit, ...this.items];
-      this.head = unit.position;
-
-      // Add tail
-    } else if (unit.position.x > this.items[this.items.length - 1].position.x) {
-      this.items = [...this.items, unit];
-      this.tail = {
-        x: unit.position.x + unit.position.width,
-        y: unit.position.y + unit.position.height,
-      };
-
-      return;
-    } else {
-      // Add middle
-      this.items = this.items.reduce((acc, curr, index) => {
-        acc.push(curr);
-
-        if (fitIndex === index) {
-          acc.push(unit);
-        }
-
-        return acc;
-      }, [] as Atom[]);
-    }
+    const lastItem = this.items[this.items.length - 1];
+    this.head = this.items[0].position;
+    this.tail = {
+      x: lastItem.position.x + lastItem.position.width,
+      y: lastItem.position.y + lastItem.position.height,
+    };
   }
 }
 
 export class Stack {
   private items: Row[] = [];
-  private cacheItems: HTMLElement[] = [];
+  private nodeList: HTMLElement[] = [];
+  private threshold = 10;
 
   private getPosition(node: HTMLElement): Position {
     const { x, y, width, height } = node.getBoundingClientRect();
@@ -95,7 +88,10 @@ export class Stack {
     const fitIndex = this.items.findIndex((row) => {
       const { tail, head } = row;
 
-      return unit.position.y >= head.y && unit.position.y <= tail.y;
+      return (
+        unit.position.y + this.threshold >= head.y &&
+        unit.position.y + this.threshold <= tail.y
+      );
     });
 
     if (fitIndex > -1) {
@@ -106,19 +102,23 @@ export class Stack {
     const row = new Row();
     row.add(unit);
 
-    // Add head
-    if (unit.position.x < this.items[0].head.x) {
-      this.items = [row, ...this.items];
-      // Add tail
-    } else if (unit.position.y > this.items[this.items.length - 1].tail.y) {
-      this.items = [...this.items, row];
-    }
+    const newItems = [...this.items, row];
+    this.items = newItems.sort((a, b) => {
+      if (a.head.y < b.head.y) {
+        return -1;
+      }
+      if (a.head.y > b.head.y) {
+        return 1;
+      }
+
+      return 0;
+    });
   }
 
   public repositionAll(): void {
     this.items = [];
 
-    this.cacheItems.forEach((node) => {
+    this.nodeList.forEach((node) => {
       this.addToItems(node);
     });
 
@@ -126,13 +126,11 @@ export class Stack {
   }
 
   public add(node: HTMLElement): () => void {
-    this.cacheItems.push(node);
+    this.nodeList.push(node);
     this.repositionAll();
 
     const removeItem = () => {
-      this.cacheItems = this.cacheItems.filter(
-        (cacheNode) => cacheNode !== node
-      );
+      this.nodeList = this.nodeList.filter((cacheNode) => cacheNode !== node);
       this.repositionAll();
     };
 
@@ -171,6 +169,6 @@ export class Stack {
   }
 
   log(): void {
-    console.log(this.items, this.cacheItems);
+    console.log(this.items, this.nodeList);
   }
 }
