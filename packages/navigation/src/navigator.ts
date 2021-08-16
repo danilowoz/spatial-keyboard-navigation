@@ -1,4 +1,4 @@
-import { DataStructure, Unit } from "./data";
+import { Stack, Atom } from "./stack";
 
 export enum Direction {
   UP,
@@ -9,8 +9,8 @@ export enum Direction {
 
 class Navigator {
   getCurrentItem(
-    data: DataStructure
-  ): { unit: Unit; indexX: number; indexY: number } | undefined {
+    data: Stack
+  ): { unit: Atom; indexX: number; indexY: number } | undefined {
     const focusItem = document.activeElement;
 
     return data.findByNode(focusItem);
@@ -20,7 +20,7 @@ class Navigator {
     node.blur();
   }
 
-  selectNode(oldUnit: Unit | undefined, unit: Unit): void {
+  selectNode(oldUnit: Atom | undefined, unit: Atom): void {
     if (oldUnit) {
       this.unselectNode(oldUnit.node);
     }
@@ -33,10 +33,10 @@ class Navigator {
   }
 
   goTo(
-    data: DataStructure,
+    data: Stack,
     direction: Direction,
-    from?: Element
-  ): Element | undefined {
+    from?: HTMLElement
+  ): HTMLElement | undefined {
     const currentItem = this.getCurrentItem(data);
     const fromItem = data.findByNode(from);
 
@@ -50,7 +50,7 @@ class Navigator {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const { unit: prevItem, indexX, indexY } = currentItem! ?? fromItem!;
 
-    let newItem: Element | undefined;
+    let newItem: HTMLElement | undefined;
 
     switch (direction) {
       case Direction.DOWN: {

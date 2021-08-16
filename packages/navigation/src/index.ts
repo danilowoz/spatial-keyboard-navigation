@@ -1,21 +1,21 @@
-import { DataStructure } from "./data";
+import { Stack } from "./stack";
 import { Direction, Navigator } from "./navigator";
 
-let dataStructureInstance: null | DataStructure;
-const initDataStructure = (): DataStructure => {
+let dataStructureInstance: null | Stack;
+const initStack = (): Stack => {
   if (dataStructureInstance) {
     return dataStructureInstance;
   }
 
-  dataStructureInstance = new DataStructure();
+  dataStructureInstance = new Stack();
 
   return dataStructureInstance;
 };
 
-let lastItemVisited: Element | undefined;
+let lastItemVisited: HTMLElement | undefined;
 const initEventListener = (): (() => void) => {
   const handler = ({ key }: { key: string }) => {
-    const data = initDataStructure();
+    const data = initStack();
     const navigation = new Navigator();
 
     switch (key) {
@@ -58,4 +58,4 @@ const initEventListener = (): (() => void) => {
   };
 };
 
-export { initDataStructure, initEventListener };
+export { initStack, initEventListener };

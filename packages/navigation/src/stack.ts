@@ -1,7 +1,7 @@
 type Position = Record<"x" | "y" | "width" | "height", number>;
 type TailHead = Record<"x" | "y", number>;
 
-export class Unit {
+export class Atom {
   position: Position;
   node: HTMLElement;
 
@@ -11,19 +11,19 @@ export class Unit {
   }
 }
 
-class Column {
-  items: Unit[] = [];
+class Row {
+  items: Atom[] = [];
 
   head: TailHead = { x: 0, y: 0 };
   tail: TailHead = { x: 0, y: 0 };
 
-  findByIndex(index: number): Unit {
+  findByIndex(index: number): Atom {
     const indexOrLast = Math.min(Math.max(index, 0), this.items.length - 1);
 
     return this.items[indexOrLast];
   }
 
-  add(unit: Unit): void {
+  add(unit: Atom): void {
     if (this.items.length === 0) {
       this.items = [unit];
 
@@ -37,16 +37,16 @@ class Column {
     }
 
     const fitIndex = this.items.findIndex((item) => {
-      return item.position.y >= this.head.y && item.position.y <= this.tail.y;
+      return item.position.x >= this.head.x && item.position.x <= this.tail.x;
     });
 
     // Add head
-    if (unit.position.y < this.items[0].position.y) {
+    if (unit.position.x < this.items[0].position.x) {
       this.items = [unit, ...this.items];
       this.head = unit.position;
 
       // Add tail
-    } else if (unit.position.y > this.items[this.items.length - 1].position.y) {
+    } else if (unit.position.x > this.items[this.items.length - 1].position.x) {
       this.items = [...this.items, unit];
       this.tail = {
         x: unit.position.x + unit.position.width,
@@ -64,13 +64,13 @@ class Column {
         }
 
         return acc;
-      }, [] as Unit[]);
+      }, [] as Atom[]);
     }
   }
 }
 
-export class DataStructure {
-  private items: Column[] = [];
+export class Stack {
+  private items: Row[] = [];
   private cacheItems: HTMLElement[] = [];
 
   private getPosition(node: HTMLElement): Position {
@@ -81,21 +81,21 @@ export class DataStructure {
 
   private addToItems(node: HTMLElement) {
     const position = this.getPosition(node);
-    const unit = new Unit(node, position);
+    const unit = new Atom(node, position);
 
     if (this.items.length === 0) {
-      const column = new Column();
-      column.add(unit);
+      const row = new Row();
+      row.add(unit);
 
-      this.items = [column];
+      this.items = [row];
 
       return;
     }
 
-    const fitIndex = this.items.findIndex((column) => {
-      const { tail, head } = column;
+    const fitIndex = this.items.findIndex((row) => {
+      const { tail, head } = row;
 
-      return unit.position.x >= head.x && unit.position.x <= tail.x;
+      return unit.position.y >= head.y && unit.position.y <= tail.y;
     });
 
     if (fitIndex > -1) {
@@ -103,15 +103,15 @@ export class DataStructure {
       return;
     }
 
-    const column = new Column();
-    column.add(unit);
+    const row = new Row();
+    row.add(unit);
 
     // Add head
     if (unit.position.x < this.items[0].head.x) {
-      this.items = [column, ...this.items];
+      this.items = [row, ...this.items];
       // Add tail
-    } else if (unit.position.x > this.items[this.items.length - 1].tail.x) {
-      this.items = [...this.items, column];
+    } else if (unit.position.y > this.items[this.items.length - 1].tail.y) {
+      this.items = [...this.items, row];
     }
   }
 
@@ -139,24 +139,24 @@ export class DataStructure {
     return removeItem;
   }
 
-  findByIndex(x: number, y: number): Unit {
-    const indexOrLast = Math.min(Math.max(x, 0), this.items.length - 1);
-    const column = this.items[indexOrLast];
+  findByIndex(x: number, y: number): Atom {
+    const indexOrLast = Math.min(Math.max(y, 0), this.items.length - 1);
+    const row = this.items[indexOrLast];
 
-    return column.findByIndex(y);
+    return row.findByIndex(x);
   }
 
   findByNode(
     node?: Element | null
-  ): { unit: Unit; indexX: number; indexY: number } | undefined {
+  ): { unit: Atom; indexX: number; indexY: number } | undefined {
     if (!node) return undefined;
 
-    let unit: Unit | undefined;
+    let unit: Atom | undefined;
     let indexX = -1;
     let indexY = -1;
 
-    this.items.forEach((column, itemIndexX) => {
-      column.items.forEach((item, itemIndexY) => {
+    this.items.forEach((row, itemIndexY) => {
+      row.items.forEach((item, itemIndexX) => {
         if (item.node === node) {
           unit = item;
           indexX = itemIndexX;
@@ -171,6 +171,6 @@ export class DataStructure {
   }
 
   log(): void {
-    // console.log(this.items, this.cacheItems);
+    console.log(this.items, this.cacheItems);
   }
 }

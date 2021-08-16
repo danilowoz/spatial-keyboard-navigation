@@ -1,4 +1,4 @@
-import { initDataStructure, initEventListener } from "navigation";
+import { initStack, initEventListener } from "navigation";
 
 import {
   FC,
@@ -17,10 +17,10 @@ const NavigationAnchor: FC = ({ children }) => {
   Children.only(children);
 
   useEffect(() => {
-    const instance = initDataStructure();
+    const stack = initStack();
 
     if (ref.current) {
-      const removeItem = instance.add(ref.current);
+      const removeItem = stack.add(ref.current);
 
       return () => {
         removeItem();
