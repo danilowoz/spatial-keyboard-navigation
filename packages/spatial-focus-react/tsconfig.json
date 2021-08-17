@@ -6,5 +6,5 @@
     "composite": true
   },
   "include": ["src"],
-  "references": [{ "path": "../navigation" }]
+  "references": [{ "path": "../spatial-focus" }]
 }

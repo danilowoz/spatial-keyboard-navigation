@@ -1,4 +1,4 @@
-import { initStack, initEventListener } from "navigation";
+import { initStack, initEventListener } from "spatial-focus";
 
 import {
   FC,

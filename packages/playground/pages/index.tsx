@@ -1,4 +1,4 @@
-import { NavigationAnchor, NavigationProvider } from "navigation-react";
+import { NavigationAnchor, NavigationProvider } from "spatial-focus-react";
 import { useState } from "react";
 import "show-keys";
 

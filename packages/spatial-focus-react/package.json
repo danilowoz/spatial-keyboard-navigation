@@ -1,5 +1,5 @@
 {
-  "name": "navigation-react",
+  "name": "spatial-focus-react",
   "version": "0.0.1",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -24,7 +24,7 @@
     "typescript": "^4.2.3"
   },
   "dependencies": {
-    "navigation": "0.0.1",
+    "spatial-focus": "0.0.1",
     "react": "^17.0.2"
   }
 }

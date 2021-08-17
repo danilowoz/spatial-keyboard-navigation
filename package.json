@@ -1,5 +1,5 @@
 {
-  "name": "navigation",
+  "name": "spatial-focus",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
@@ -8,7 +8,7 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "concurrently \"yarn workspace navigation dev\" \"yarn workspace navigation-react dev\" \"yarn workspace playground dev\"",
+    "dev": "concurrently \"yarn workspace spatial-focus dev\" \"yarn workspace spatial-focus-react dev\" \"yarn workspace playground dev\"",
     "prebuild": "yarn run clean",
     "build": "yarn tsc --build packages",
     "clean": "yarn lerna run clean --concurrency 4",

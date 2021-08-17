@@ -16,35 +16,23 @@ let lastItemVisited: HTMLElement | undefined;
 const initEventListener = (): (() => void) => {
   const handler = ({ key }: { key: string }) => {
     const data = initStack();
-    const navigation = new Navigator();
+    const nav = new Navigator();
 
     switch (key) {
       case "ArrowUp":
-        lastItemVisited = navigation.goTo(data, Direction.UP, lastItemVisited);
+        lastItemVisited = nav.goTo(data, Direction.UP, lastItemVisited);
 
         break;
       case "ArrowRight":
-        lastItemVisited = navigation.goTo(
-          data,
-          Direction.RIGHT,
-          lastItemVisited
-        );
+        lastItemVisited = nav.goTo(data, Direction.RIGHT, lastItemVisited);
 
         break;
       case "ArrowDown":
-        lastItemVisited = navigation.goTo(
-          data,
-          Direction.DOWN,
-          lastItemVisited
-        );
+        lastItemVisited = nav.goTo(data, Direction.DOWN, lastItemVisited);
 
         break;
       case "ArrowLeft":
-        lastItemVisited = navigation.goTo(
-          data,
-          Direction.LEFT,
-          lastItemVisited
-        );
+        lastItemVisited = nav.goTo(data, Direction.LEFT, lastItemVisited);
 
         break;
     }

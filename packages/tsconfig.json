@@ -1,4 +1,4 @@
 {
   "files": [],
-  "references": [{ "path": "navigation" }, { "path": "navigation-react" }]
+  "references": [{ "path": "spatial-focus" }, { "path": "spatial-focus-react" }]
 }
