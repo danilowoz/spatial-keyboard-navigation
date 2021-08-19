@@ -144,6 +144,24 @@ export class Stack {
     return row.findByIndex(x);
   }
 
+  findUnitByNode(node?: Element | null): Unit | undefined {
+    if (!node) return undefined;
+
+    let unitCandidate: Unit | undefined;
+
+    for (const row of this.items) {
+      for (const unit of row.items) {
+        if (unit.node === node) {
+          unitCandidate = unit;
+        }
+      }
+    }
+
+    if (!unitCandidate) return undefined;
+
+    return unitCandidate;
+  }
+
   findNextUnit(unit: Unit): Unit | undefined {
     const unitSize = {
       x: unit.position.x + unit.position.width + this.threshold,
@@ -170,7 +188,7 @@ export class Stack {
 
     for (const unit of rowCandidate.items) {
       if (
-        unit.position.x + this.threshold >= unit.position.x &&
+        unit.position.x + this.threshold >= unit.position.x ||
         unitSize.x <= unit.position.x + unit.position.width
       ) {
         unitCandidate = unit;
@@ -181,30 +199,6 @@ export class Stack {
     if (!unitCandidate) return undefined;
 
     return unitCandidate;
-  }
-
-  findUnitByNode(
-    node?: Element | null
-  ): { unit: Unit; indexX: number; indexY: number } | undefined {
-    if (!node) return undefined;
-
-    let unit: Unit | undefined;
-    let indexX = -1;
-    let indexY = -1;
-
-    this.items.forEach((row, itemIndexY) => {
-      row.items.forEach((item, itemIndexX) => {
-        if (item.node === node) {
-          unit = item;
-          indexX = itemIndexX;
-          indexY = itemIndexY;
-        }
-      });
-    });
-
-    if (!unit) return undefined;
-
-    return { unit, indexX, indexY };
   }
 
   log(): void {

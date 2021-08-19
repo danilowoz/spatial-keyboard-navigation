@@ -8,10 +8,7 @@ export enum Direction {
 }
 
 class Navigator {
-  getCurrentItem(
-    data: Stack
-    // TODO - deprecate indexes
-  ): { unit: Unit; indexX: number; indexY: number } | undefined {
+  getCurrentItem(data: Stack): Unit | undefined {
     const focusItem = document.activeElement;
 
     return data.findUnitByNode(focusItem);
@@ -49,16 +46,16 @@ class Navigator {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const candidate = currentItem! ?? fromItem!;
-    const { unit: prevItem } = candidate;
+    const prevUnit = currentItem! ?? fromItem!;
 
     let newItem: HTMLElement | undefined;
 
     switch (direction) {
       case Direction.DOWN: {
-        const unit = data.findNextUnit(candidate.unit);
+        const unit = data.findNextUnit(prevUnit);
+
         if (unit) {
-          this.selectNode(prevItem, unit);
+          this.selectNode(prevUnit, unit);
           newItem = unit.node;
         }
 
