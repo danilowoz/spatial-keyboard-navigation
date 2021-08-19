@@ -53,7 +53,7 @@ class Navigator {
 
     switch (direction) {
       case Direction.DOWN: {
-        const unit = data.findColumn(prevUnit, { prev: false });
+        const unit = data.findColumn(candidate, { prev: false });
 
         if (unit) {
           this.selectNode(prevUnit, unit);
@@ -64,7 +64,7 @@ class Navigator {
       }
 
       case Direction.UP: {
-        const unit = data.findColumn(prevUnit, { prev: true });
+        const unit = data.findColumn(candidate, { prev: true });
 
         if (unit) {
           this.selectNode(prevUnit, unit);

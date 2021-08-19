@@ -176,34 +176,34 @@ export class Stack {
     };
   }
 
-  private rowInTheSameColumn(row: Row, unit: Unit): boolean {
-    const unitSize = this.createSize(unit);
+  // private rowInTheSameColumn(row: Row, unit: Unit): boolean {
+  //   const unitSize = this.createSize(unit);
 
-    const isSameRow = row.items.map((e) => e.node).includes(unit.node);
+  //   const isSameRow = row.items.map((e) => e.node).includes(unit.node);
 
-    /**
-     * [------ row ------] - row (tail & head)
-     *   [-- unit --]
-     */
-    const fitInTailHead =
-      unitSize.x1 >= row.head.x && unitSize.x2 <= row.tail.x;
+  //   /**
+  //    * [------ row ------] - row (tail & head)
+  //    *   [-- unit --]
+  //    */
+  //   const fitInTailHead =
+  //     unitSize.x1 >= row.head.x && unitSize.x2 <= row.tail.x;
 
-    /**
-     *     [------ row ------] (tail & head)
-     * [-- unit --]
-     */
-    const fitHead = row.head.x >= unitSize.x1 && row.head.x <= unitSize.x2;
+  //   /**
+  //    *     [------ row ------] (tail & head)
+  //    * [-- unit --]
+  //    */
+  //   const fitHead = row.head.x >= unitSize.x1 && row.head.x <= unitSize.x2;
 
-    /**
-     *  [------ row ------] (tail & head)
-     *            [-- unit --]
-     */
-    const fitTail = row.tail.x >= unitSize.x1 && row.tail.x <= unitSize.x2;
+  //   /**
+  //    *  [------ row ------] (tail & head)
+  //    *            [-- unit --]
+  //    */
+  //   const fitTail = row.tail.x >= unitSize.x1 && row.tail.x <= unitSize.x2;
 
-    return !isSameRow && (fitInTailHead || fitHead || fitTail);
-  }
+  //   return !isSameRow && (fitInTailHead || fitHead || fitTail);
+  // }
 
-  private unitInTheSameColumn(prevUnit: Unit, nextUnit: Unit): boolean {
+  private unitsOverlapPosition(prevUnit: Unit, nextUnit: Unit): boolean {
     const prevSize = this.createSize(prevUnit);
     const nextSize = this.createSize(nextUnit);
 
@@ -230,40 +230,102 @@ export class Stack {
   }
 
   public findColumn(
-    lookUpUnit: Unit,
+    lookUp: UnitIndex,
     options: { prev: boolean }
   ): Unit | undefined {
-    const unitSize = this.createSize(lookUpUnit);
+    const unitSize = this.createSize(lookUp.unit);
+    const { indexY } = lookUp;
 
-    let rowCandidate: undefined | Row;
+    // last item
+    if (indexY === this.items.length - 1 && !options.prev) return;
+
+    // first item for reverse
+    if (indexY === 0 && options.prev) return;
+
     let unitCandidate: undefined | Unit;
 
     const items = options.prev ? [...this.items].reverse() : this.items;
     for (const row of items) {
-      const fits = this.rowInTheSameColumn(row, lookUpUnit);
+      const isSameRow = row.items.map((e) => e.node).includes(lookUp.unit.node);
 
       const onlyGreater = row.tail.y >= unitSize.y2;
       const onlySmaller = row.head.y <= unitSize.y2;
       const filterConstraint = options.prev ? onlySmaller : onlyGreater;
 
-      if (fits && filterConstraint) {
-        rowCandidate = row;
-        break;
+      if (!isSameRow && filterConstraint) {
+        const fitsUnit = row.items.find((unitItem) =>
+          this.unitsOverlapPosition(unitItem, lookUp.unit)
+        );
+
+        if (fitsUnit) {
+          unitCandidate = fitsUnit;
+
+          break;
+        }
       }
     }
 
-    if (!rowCandidate) return undefined;
+    if (unitCandidate) return unitCandidate;
 
-    for (const unit of rowCandidate.items) {
-      const fits = this.unitInTheSameColumn(lookUpUnit, unit);
+    // debugger;
 
-      if (fits) {
-        unitCandidate = unit;
-        break;
+    // still not found, look for until satisfy
+    if (options.prev) {
+      let indexAttempt = indexY;
+      while (!unitCandidate && indexAttempt > 0) {
+        indexAttempt--;
+        const attempt = this.items[indexAttempt];
+
+        const fitsUnit = attempt.items.find((rowItem) =>
+          this.unitsOverlapPosition(rowItem, lookUp.unit)
+        );
+
+        if (fitsUnit) {
+          unitCandidate = fitsUnit;
+
+          break;
+        }
+      }
+    } else {
+      let indexAttempt = indexY;
+      while (!unitCandidate && indexAttempt < this.items.length - 1) {
+        indexAttempt++;
+        const attempt = this.items[indexAttempt];
+
+        const fitsUnit = attempt.items.find((rowItem) =>
+          this.unitsOverlapPosition(rowItem, lookUp.unit)
+        );
+
+        if (fitsUnit) {
+          unitCandidate = fitsUnit;
+
+          break;
+        }
       }
     }
+
+    console.log(unitCandidate);
+
+    // still not found, get straight next or prev
+    // if (!rowCandidate) {
+    //   if (options.prev) {
+    //     rowCandidate = this.items[indexY - 1];
+    //   } else {
+    //     rowCandidate = this.items[indexY + 1];
+    //   }
+    // }
+
+    // for (const unit of rowCandidate.items) {
+    //   const fits = this.unitsOverlapPosition(lookUp.unit, unit);
+
+    //   if (fits) {
+    //     unitCandidate = unit;
+    //     break;
+    //   }
+    // }
 
     if (!unitCandidate) return undefined;
+    // // TODO get closer
 
     return unitCandidate;
   }
