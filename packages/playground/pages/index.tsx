@@ -16,11 +16,7 @@ const App: React.FC = () => {
       <table>
         <tbody>
           <tr>
-            <td>
-              <NavigationAnchor>
-                <a href="">test 1</a>
-              </NavigationAnchor>
-            </td>
+            <td></td>
             <td>
               <NavigationAnchor>
                 <a href="">test 2</a>
@@ -29,6 +25,19 @@ const App: React.FC = () => {
             <td>
               <NavigationAnchor>
                 <a href="">test 3</a>
+              </NavigationAnchor>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <NavigationAnchor>
+                <a href="">test 11111</a>
+              </NavigationAnchor>
+            </td>
+            <td></td>
+            <td>
+              <NavigationAnchor>
+                <a href="">test 2</a>
               </NavigationAnchor>
             </td>
           </tr>

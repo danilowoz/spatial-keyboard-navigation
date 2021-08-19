@@ -1,4 +1,4 @@
-import { Stack, Atom } from "./stack";
+import { Stack, Unit } from "./stack";
 
 export enum Direction {
   UP,
@@ -10,17 +10,18 @@ export enum Direction {
 class Navigator {
   getCurrentItem(
     data: Stack
-  ): { unit: Atom; indexX: number; indexY: number } | undefined {
+    // TODO - deprecate indexes
+  ): { unit: Unit; indexX: number; indexY: number } | undefined {
     const focusItem = document.activeElement;
 
-    return data.findByNode(focusItem);
+    return data.findUnitByNode(focusItem);
   }
 
   unselectNode(node: HTMLElement): void {
     node.blur();
   }
 
-  selectNode(oldUnit: Atom | undefined, unit: Atom): void {
+  selectNode(oldUnit: Unit | undefined, unit: Unit): void {
     if (oldUnit) {
       this.unselectNode(oldUnit.node);
     }
@@ -38,7 +39,7 @@ class Navigator {
     from?: HTMLElement
   ): HTMLElement | undefined {
     const currentItem = this.getCurrentItem(data);
-    const fromItem = data.findByNode(from);
+    const fromItem = data.findUnitByNode(from);
 
     if (!currentItem && !fromItem) {
       const unit = data?.findByIndex(0, 0);
@@ -48,46 +49,48 @@ class Navigator {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const { unit: prevItem, indexX, indexY } = currentItem! ?? fromItem!;
+    const candidate = currentItem! ?? fromItem!;
+    const { unit: prevItem } = candidate;
 
     let newItem: HTMLElement | undefined;
 
     switch (direction) {
       case Direction.DOWN: {
-        const unit = data.findByIndex(indexX, indexY + 1);
-        this.selectNode(prevItem, unit);
-
-        newItem = unit.node;
-
-        break;
-      }
-
-      case Direction.UP: {
-        const unit = data.findByIndex(indexX, indexY - 1);
-        this.selectNode(prevItem, unit);
-
-        newItem = unit.node;
+        const unit = data.findNextUnit(candidate.unit);
+        if (unit) {
+          this.selectNode(prevItem, unit);
+          newItem = unit.node;
+        }
 
         break;
       }
 
-      case Direction.RIGHT: {
-        const unit = data.findByIndex(indexX + 1, indexY);
-        this.selectNode(prevItem, unit);
+      // case Direction.UP: {
+      //   const unit = data.findByIndex(indexX, indexY - 1);
+      //   this.selectNode(prevItem, unit);
 
-        newItem = unit.node;
+      //   newItem = unit.node;
 
-        break;
-      }
+      //   break;
+      // }
 
-      case Direction.LEFT: {
-        const unit = data.findByIndex(indexX - 1, indexY);
-        this.selectNode(prevItem, unit);
+      // case Direction.RIGHT: {
+      //   const unit = data.findByIndex(indexX + 1, indexY);
+      //   this.selectNode(prevItem, unit);
 
-        newItem = unit.node;
+      //   newItem = unit.node;
 
-        break;
-      }
+      //   break;
+      // }
+
+      // case Direction.LEFT: {
+      //   const unit = data.findByIndex(indexX - 1, indexY);
+      //   this.selectNode(prevItem, unit);
+
+      //   newItem = unit.node;
+
+      //   break;
+      // }
     }
 
     return newItem;

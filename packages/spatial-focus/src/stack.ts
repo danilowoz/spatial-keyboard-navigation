@@ -1,7 +1,7 @@
 type Position = Record<"x" | "y" | "width" | "height", number>;
 type TailHead = Record<"x" | "y", number>;
 
-export class Atom {
+export class Unit {
   position: Position;
   node: HTMLElement;
 
@@ -12,18 +12,18 @@ export class Atom {
 }
 
 class Row {
-  items: Atom[] = [];
+  items: Unit[] = [];
 
   head: TailHead = { x: 0, y: 0 };
   tail: TailHead = { x: 0, y: 0 };
 
-  findByIndex(index: number): Atom {
+  findByIndex(index: number): Unit {
     const indexOrLast = Math.min(Math.max(index, 0), this.items.length - 1);
 
     return this.items[indexOrLast];
   }
 
-  add(unit: Atom): void {
+  add(unit: Unit): void {
     if (this.items.length === 0) {
       this.items = [unit];
 
@@ -74,7 +74,7 @@ export class Stack {
 
   private addToItems(node: HTMLElement) {
     const position = this.getPosition(node);
-    const unit = new Atom(node, position);
+    const unit = new Unit(node, position);
 
     if (this.items.length === 0) {
       const row = new Row();
@@ -137,19 +137,58 @@ export class Stack {
     return removeItem;
   }
 
-  findByIndex(x: number, y: number): Atom {
+  findByIndex(x: number, y: number): Unit {
     const indexOrLast = Math.min(Math.max(y, 0), this.items.length - 1);
     const row = this.items[indexOrLast];
 
     return row.findByIndex(x);
   }
 
-  findByNode(
+  findNextUnit(unit: Unit): Unit | undefined {
+    const unitSize = {
+      x: unit.position.x + unit.position.width + this.threshold,
+      y: unit.position.y + unit.position.height + this.threshold,
+    };
+
+    let rowCandidate: undefined | Row;
+    let unitCandidate: undefined | Unit;
+
+    for (const row of this.items) {
+      const isSameRow = row.items.map((e) => e.node).includes(unit.node);
+
+      if (
+        !isSameRow &&
+        unit.position.x + this.threshold >= row.head.x &&
+        unitSize.x <= row.tail.x
+      ) {
+        rowCandidate = row;
+        break;
+      }
+    }
+
+    if (!rowCandidate) return undefined;
+
+    for (const unit of rowCandidate.items) {
+      if (
+        unit.position.x + this.threshold >= unit.position.x &&
+        unitSize.x <= unit.position.x + unit.position.width
+      ) {
+        unitCandidate = unit;
+        break;
+      }
+    }
+
+    if (!unitCandidate) return undefined;
+
+    return unitCandidate;
+  }
+
+  findUnitByNode(
     node?: Element | null
-  ): { unit: Atom; indexX: number; indexY: number } | undefined {
+  ): { unit: Unit; indexX: number; indexY: number } | undefined {
     if (!node) return undefined;
 
-    let unit: Atom | undefined;
+    let unit: Unit | undefined;
     let indexX = -1;
     let indexY = -1;
 
@@ -169,6 +208,6 @@ export class Stack {
   }
 
   log(): void {
-    console.log(this.items, this.nodeList);
+    // console.log(this.items, this.nodeList);
   }
 }
