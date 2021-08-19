@@ -1,5 +1,7 @@
 type Position = Record<"x" | "y" | "width" | "height", number>;
 type TailHead = Record<"x" | "y", number>;
+type Size = Record<"x1" | "x2" | "y1" | "y2", number>;
+export type UnitIndex = { unit: Unit; indexX: number; indexY: number };
 
 export class Unit {
   position: Position;
@@ -143,25 +145,29 @@ export class Stack {
     return row.findByIndex(x);
   }
 
-  public findUnitByNode(node?: Element | null): Unit | undefined {
+  public findUnitByNode(node?: Element | null): UnitIndex | undefined {
     if (!node) return undefined;
 
-    let unitCandidate: Unit | undefined;
+    let unit: Unit | undefined;
+    let indexX = -1;
+    let indexY = -1;
 
-    for (const row of this.items) {
-      for (const unit of row.items) {
-        if (unit.node === node) {
-          unitCandidate = unit;
+    this.items.forEach((row, itemIndexY) => {
+      row.items.forEach((item, itemIndexX) => {
+        if (item.node === node) {
+          unit = item;
+          indexX = itemIndexX;
+          indexY = itemIndexY;
         }
-      }
-    }
+      });
+    });
 
-    if (!unitCandidate) return undefined;
+    if (!unit) return undefined;
 
-    return unitCandidate;
+    return { unit, indexX, indexY };
   }
 
-  private createSize(unit: Unit): Record<"x1" | "x2" | "y1" | "y2", number> {
+  private createSize(unit: Unit): Size {
     return {
       x1: unit.position.x,
       x2: unit.position.x + unit.position.width,
@@ -250,11 +256,6 @@ export class Stack {
 
     for (const unit of rowCandidate.items) {
       const fits = this.unitInTheSameColumn(lookUpUnit, unit);
-
-      // TODO - left and right
-      // const onlyGreater = row.tail.y >= unitSize.y;
-      // const onlySmaller = row.head.y <= unitSize.y;
-      // // const filterConstraint = options.prev ? onlySmaller : onlyGreater;
 
       if (fits) {
         unitCandidate = unit;

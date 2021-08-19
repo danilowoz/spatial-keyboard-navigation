@@ -1,4 +1,4 @@
-import { Stack, Unit } from "./stack";
+import { Stack, Unit, UnitIndex } from "./stack";
 
 export enum Direction {
   UP,
@@ -8,7 +8,7 @@ export enum Direction {
 }
 
 class Navigator {
-  getCurrentItem(data: Stack): Unit | undefined {
+  getCurrentItem(data: Stack): UnitIndex | undefined {
     const focusItem = document.activeElement;
 
     return data.findUnitByNode(focusItem);
@@ -46,7 +46,8 @@ class Navigator {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const prevUnit = currentItem! ?? fromItem!;
+    const candidate = currentItem! ?? fromItem!;
+    const { unit: prevUnit, indexX, indexY } = candidate;
 
     let newItem: HTMLElement | undefined;
 
@@ -73,23 +74,23 @@ class Navigator {
         break;
       }
 
-      // case Direction.RIGHT: {
-      //   const unit = data.findByIndex(indexX + 1, indexY);
-      //   this.selectNode(prevItem, unit);
+      case Direction.RIGHT: {
+        const unit = data.findByIndex(indexX + 1, indexY);
+        this.selectNode(prevUnit, unit);
 
-      //   newItem = unit.node;
+        newItem = unit.node;
 
-      //   break;
-      // }
+        break;
+      }
 
-      // case Direction.LEFT: {
-      //   const unit = data.findByIndex(indexX - 1, indexY);
-      //   this.selectNode(prevItem, unit);
+      case Direction.LEFT: {
+        const unit = data.findByIndex(indexX - 1, indexY);
+        this.selectNode(prevUnit, unit);
 
-      //   newItem = unit.node;
+        newItem = unit.node;
 
-      //   break;
-      // }
+        break;
+      }
     }
 
     return newItem;
