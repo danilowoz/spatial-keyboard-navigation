@@ -52,7 +52,7 @@ class Navigator {
 
     switch (direction) {
       case Direction.DOWN: {
-        const unit = data.findNextUnit(prevUnit);
+        const unit = data.findColumn(prevUnit, { prev: false });
 
         if (unit) {
           this.selectNode(prevUnit, unit);
@@ -62,14 +62,16 @@ class Navigator {
         break;
       }
 
-      // case Direction.UP: {
-      //   const unit = data.findByIndex(indexX, indexY - 1);
-      //   this.selectNode(prevItem, unit);
+      case Direction.UP: {
+        const unit = data.findColumn(prevUnit, { prev: true });
 
-      //   newItem = unit.node;
+        if (unit) {
+          this.selectNode(prevUnit, unit);
+          newItem = unit.node;
+        }
 
-      //   break;
-      // }
+        break;
+      }
 
       // case Direction.RIGHT: {
       //   const unit = data.findByIndex(indexX + 1, indexY);

@@ -64,7 +64,9 @@ class Row {
 export class Stack {
   private items: Row[] = [];
   private nodeList: HTMLElement[] = [];
-  private threshold = 10;
+
+  // TODO - improve it
+  // private threshold = 10;
 
   private getPosition(node: HTMLElement): Position {
     const { x, y, width, height } = node.getBoundingClientRect();
@@ -88,10 +90,7 @@ export class Stack {
     const fitIndex = this.items.findIndex((row) => {
       const { tail, head } = row;
 
-      return (
-        unit.position.y + this.threshold >= head.y &&
-        unit.position.y + this.threshold <= tail.y
-      );
+      return unit.position.y >= head.y && unit.position.y <= tail.y;
     });
 
     if (fitIndex > -1) {
@@ -137,14 +136,14 @@ export class Stack {
     return removeItem;
   }
 
-  findByIndex(x: number, y: number): Unit {
+  public findByIndex(x: number, y: number): Unit {
     const indexOrLast = Math.min(Math.max(y, 0), this.items.length - 1);
     const row = this.items[indexOrLast];
 
     return row.findByIndex(x);
   }
 
-  findUnitByNode(node?: Element | null): Unit | undefined {
+  public findUnitByNode(node?: Element | null): Unit | undefined {
     if (!node) return undefined;
 
     let unitCandidate: Unit | undefined;
@@ -162,23 +161,86 @@ export class Stack {
     return unitCandidate;
   }
 
-  findNextUnit(unit: Unit): Unit | undefined {
-    const unitSize = {
-      x: unit.position.x + unit.position.width + this.threshold,
-      y: unit.position.y + unit.position.height + this.threshold,
+  private createSize(unit: Unit): Record<"x1" | "x2" | "y1" | "y2", number> {
+    return {
+      x1: unit.position.x,
+      x2: unit.position.x + unit.position.width,
+      y1: unit.position.y,
+      y2: unit.position.y + unit.position.height,
     };
+  }
+
+  private rowInTheSameColumn(row: Row, unit: Unit): boolean {
+    const unitSize = this.createSize(unit);
+
+    const isSameRow = row.items.map((e) => e.node).includes(unit.node);
+
+    /**
+     * [------ row ------] - row (tail & head)
+     *   [-- unit --]
+     */
+    const fitInTailHead =
+      unitSize.x1 >= row.head.x && unitSize.x2 <= row.tail.x;
+
+    /**
+     *     [------ row ------] (tail & head)
+     * [-- unit --]
+     */
+    const fitHead = row.head.x >= unitSize.x1 && row.head.x <= unitSize.x2;
+
+    /**
+     *  [------ row ------] (tail & head)
+     *            [-- unit --]
+     */
+    const fitTail = row.tail.x >= unitSize.x1 && row.tail.x <= unitSize.x2;
+
+    return !isSameRow && (fitInTailHead || fitHead || fitTail);
+  }
+
+  private unitInTheSameColumn(prevUnit: Unit, nextUnit: Unit): boolean {
+    const prevSize = this.createSize(prevUnit);
+    const nextSize = this.createSize(nextUnit);
+
+    /**
+     * [------ prevUnit ------]
+     *   [-- nextUnit --]
+     */
+    const fitInTailHead =
+      nextSize.x1 >= prevSize.x1 && nextSize.x2 <= prevSize.x2;
+
+    /**
+     *     [------ prevUnit ------]
+     * [-- nextUnit --]
+     */
+    const fitHead = prevSize.x1 >= nextSize.x1 && prevSize.x1 <= nextSize.x2;
+
+    /**
+     *  [------ prevUnit ------]
+     *            [-- nextUnit --]
+     */
+    const fitTail = prevSize.x2 >= nextSize.x1 && prevSize.x2 <= nextSize.x2;
+
+    return fitInTailHead || fitHead || fitTail;
+  }
+
+  public findColumn(
+    lookUpUnit: Unit,
+    options: { prev: boolean }
+  ): Unit | undefined {
+    const unitSize = this.createSize(lookUpUnit);
 
     let rowCandidate: undefined | Row;
     let unitCandidate: undefined | Unit;
 
-    for (const row of this.items) {
-      const isSameRow = row.items.map((e) => e.node).includes(unit.node);
+    const items = options.prev ? [...this.items].reverse() : this.items;
+    for (const row of items) {
+      const fits = this.rowInTheSameColumn(row, lookUpUnit);
 
-      if (
-        !isSameRow &&
-        unit.position.x + this.threshold >= row.head.x &&
-        unitSize.x <= row.tail.x
-      ) {
+      const onlyGreater = row.tail.y >= unitSize.y2;
+      const onlySmaller = row.head.y <= unitSize.y2;
+      const filterConstraint = options.prev ? onlySmaller : onlyGreater;
+
+      if (fits && filterConstraint) {
         rowCandidate = row;
         break;
       }
@@ -187,10 +249,14 @@ export class Stack {
     if (!rowCandidate) return undefined;
 
     for (const unit of rowCandidate.items) {
-      if (
-        unit.position.x + this.threshold >= unit.position.x ||
-        unitSize.x <= unit.position.x + unit.position.width
-      ) {
+      const fits = this.unitInTheSameColumn(lookUpUnit, unit);
+
+      // TODO - left and right
+      // const onlyGreater = row.tail.y >= unitSize.y;
+      // const onlySmaller = row.head.y <= unitSize.y;
+      // // const filterConstraint = options.prev ? onlySmaller : onlyGreater;
+
+      if (fits) {
         unitCandidate = unit;
         break;
       }
@@ -201,7 +267,7 @@ export class Stack {
     return unitCandidate;
   }
 
-  log(): void {
+  private log(): void {
     // console.log(this.items, this.nodeList);
   }
 }
