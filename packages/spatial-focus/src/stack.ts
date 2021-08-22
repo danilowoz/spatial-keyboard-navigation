@@ -320,6 +320,6 @@ export class Stack {
   }
 
   private log(): void {
-    // console.log(this.items, this.nodeList);
+    console.log(this.items, this.nodeList);
   }
 }

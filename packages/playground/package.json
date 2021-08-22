@@ -12,11 +12,16 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "spatial-focus-react": "0.0.1",
+    "@types/faker": "^5.5.8",
+    "autoprefixer": "^10.3.2",
+    "faker": "^5.5.3",
     "next": "^11.0.1",
+    "postcss": "^8.3.6",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "show-keys": "^1.1.2"
+    "show-keys": "^1.1.2",
+    "spatial-focus-react": "0.0.1",
+    "tailwindcss": "^2.2.7"
   },
   "devDependencies": {
     "@types/react": "^17.0.16",

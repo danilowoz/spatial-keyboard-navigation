@@ -1,101 +1,28 @@
-import { NavigationAnchor, NavigationProvider } from "spatial-focus-react";
-import { useState } from "react";
+import { NavigationProvider } from "spatial-focus-react";
+
 import "show-keys";
+import Sidebar from "../components/Sidebar";
+import Header from "../components/Header";
+import Main from "../components/Main";
+import { useState } from "react";
 
 const App: React.FC = () => {
-  const [toggle, setToggle] = useState(false);
+  const [currentItem, setCurrentItem] = useState(0);
+
   return (
     <NavigationProvider>
-      <style>{`*:focus {
+      <style>{`[data-focus-visible-added] {
     outline: 2px solid #d71ef7;
 }
  `}</style>
-      <NavigationAnchor>
-        <button onClick={() => setToggle(!toggle)}>Toggle</button>
-      </NavigationAnchor>
-      <table>
-        <tbody>
-          <tr>
-            <td></td>
-            <td>
-              <NavigationAnchor>
-                <a href="">test 2</a>
-              </NavigationAnchor>
-            </td>
-            <td>
-              <NavigationAnchor>
-                <a href="">test 3</a>
-              </NavigationAnchor>
-            </td>
-            <td>
-              <NavigationAnchor>
-                <a href="">test 3</a>
-              </NavigationAnchor>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <NavigationAnchor>
-                <a href="">test 2</a>
-              </NavigationAnchor>
-            </td>
-            <td></td>
-            <td>
-              <NavigationAnchor>
-                <a href="">test 2</a>
-              </NavigationAnchor>
-            </td>
-            <td>
-              <NavigationAnchor>
-                <a href="">test 2</a>
-              </NavigationAnchor>
-            </td>
-          </tr>
-          {toggle && (
-            <tr>
-              <td>
-                <NavigationAnchor>
-                  <a href="">test new</a>
-                </NavigationAnchor>
-              </td>
-              <td></td>
-              <td>
-                <NavigationAnchor>
-                  <a href="">test new</a>
-                </NavigationAnchor>
-              </td>
-              <td>
-                <NavigationAnchor>
-                  <a href="">test new</a>
-                </NavigationAnchor>
-              </td>
-            </tr>
-          )}
-          <tr>
-            <td>
-              <NavigationAnchor>
-                <a href="">test 4</a>
-              </NavigationAnchor>
-            </td>
-
-            <td></td>
-            <td>
-              <NavigationAnchor>
-                <a href="">test 6</a>
-              </NavigationAnchor>
-            </td>
-          </tr>
-          <tr>
-            <td></td>
-            <td></td>
-            <td>
-              <NavigationAnchor>
-                <a href="">test 6</a>
-              </NavigationAnchor>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div
+        className="grid grid-cols-3 h-screen"
+        style={{ gridTemplateRows: "5em 1fr" }}
+      >
+        <Header />
+        <Sidebar onClick={setCurrentItem} />
+        <Main currentItem={currentItem} />
+      </div>
     </NavigationProvider>
   );
 };
