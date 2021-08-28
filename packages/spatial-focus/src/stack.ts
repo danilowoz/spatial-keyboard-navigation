@@ -19,13 +19,13 @@ class Row {
   head: TailHead = { x: 0, y: 0 };
   tail: TailHead = { x: 0, y: 0 };
 
-  findByIndex(index: number): Unit {
+  public findByIndex(index: number): Unit {
     const indexOrLast = Math.min(Math.max(index, 0), this.items.length - 1);
 
     return this.items[indexOrLast];
   }
 
-  add(unit: Unit): void {
+  public add(unit: Unit): void {
     if (this.items.length === 0) {
       this.items = [unit];
 
@@ -66,9 +66,6 @@ class Row {
 export class Stack {
   private items: Row[] = [];
   private nodeList: HTMLElement[] = [];
-
-  // TODO - improve it
-  // private threshold = 10;
 
   private getPosition(node: HTMLElement): Position {
     const { x, y, width, height } = node.getBoundingClientRect();
@@ -260,13 +257,12 @@ export class Stack {
     if (indexY === 0 && options.prev) return;
 
     let unitCandidate: undefined | Unit;
-
     const items = options.prev ? [...this.items].reverse() : this.items;
     for (const row of items) {
       const isSameRow = row.items.map((e) => e.node).includes(lookUp.unit.node);
 
-      const onlyGreater = row.tail.y >= unitSize.y2;
-      const onlySmaller = row.head.y <= unitSize.y2;
+      const onlyGreater = row.tail.y > unitSize.y2;
+      const onlySmaller = row.head.y < unitSize.y2;
       const filterConstraint = options.prev ? onlySmaller : onlyGreater;
 
       if (!isSameRow && filterConstraint) {
