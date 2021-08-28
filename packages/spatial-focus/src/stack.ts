@@ -116,7 +116,7 @@ export class Stack {
     });
   }
 
-  public repositionAll(): void {
+  private repositionAll(): void {
     this.items = [];
 
     this.nodeList.forEach((node) => {
@@ -176,34 +176,49 @@ export class Stack {
     };
   }
 
-  private rowFindCloserUnit(row: Row, unit: Unit): Unit | undefined {
+  private rowFindCloserUnit(
+    row: Row,
+    unit: Unit,
+    direction: "x" | "y"
+  ): Unit | undefined {
     let unitCandidate: undefined | Unit;
 
+    const invertDirection = direction === "x" ? "y" : "x";
+    const position1 = `${invertDirection}1` as keyof Size;
+    const position2 = `${invertDirection}2` as keyof Size;
+
+    const unitSize = this.createSize(unit);
+
     for (const itemRow of row.items) {
+      if (itemRow === unit) return unitCandidate;
+
       if (unitCandidate) {
         const candidateSize = this.createSize(unitCandidate);
-        const unitSize = this.createSize(unit);
         const itemRowSize = this.createSize(itemRow);
 
         /**
          * As it never overlaps, it must be on the right of left
          */
-        if (itemRowSize.x1 > unitSize.x1) {
+        if (itemRowSize[position1] > unitSize[position1]) {
           /**
-           * Right
+           * Right / Bottom
            */
-          const diffCandidateToUnit = unitSize.x1 - candidateSize.x2;
-          const diffItemRowToUnit = itemRowSize.x1 - unitSize.x2;
+          const diffCandidateToUnit =
+            unitSize[position1] - candidateSize[position2];
+          const diffItemRowToUnit =
+            itemRowSize[position1] - unitSize[position2];
 
           if (diffItemRowToUnit < diffCandidateToUnit) {
             unitCandidate = itemRow;
           }
         } else {
           /**
-           * Left
+           * Left / Top
            */
-          const diffCandidateToUnit = unitSize.x1 - candidateSize.x2;
-          const diffItemRowToUnit = itemRowSize.x2 - unitSize.x1;
+          const diffCandidateToUnit =
+            unitSize[position1] - candidateSize[position2];
+          const diffItemRowToUnit =
+            itemRowSize[position2] - unitSize[position1];
 
           if (diffItemRowToUnit < diffCandidateToUnit) {
             unitCandidate = itemRow;
@@ -217,28 +232,43 @@ export class Stack {
     return unitCandidate;
   }
 
-  private unitsOverlapPosition(prevUnit: Unit, nextUnit: Unit): boolean {
+  private unitsOverlapPosition(
+    prevUnit: Unit,
+    nextUnit: Unit,
+    direction: "x" | "y"
+  ): boolean {
+    if (prevUnit === nextUnit) return false;
+
     const prevSize = this.createSize(prevUnit);
     const nextSize = this.createSize(nextUnit);
+
+    const invertDirection = direction === "x" ? "y" : "x";
+    const position1 = `${invertDirection}1` as keyof Size;
+    const position2 = `${invertDirection}2` as keyof Size;
 
     /**
      * [-- prevUnit --]
      * [-- nextUnit --]
      */
     const fitInTailHead =
-      nextSize.x1 >= prevSize.x1 && nextSize.x2 <= prevSize.x2;
+      nextSize[position1] >= prevSize[position1] &&
+      nextSize[position2] <= prevSize[position2];
 
     /**
      *     [-- prevUnit --]
      * [-- nextUnit --]
      */
-    const fitHead = prevSize.x1 >= nextSize.x1 && prevSize.x1 <= nextSize.x2;
+    const fitHead =
+      prevSize[position1] >= nextSize[position1] &&
+      prevSize[position1] <= nextSize[position2];
 
     /**
      *  [-- prevUnit --]
      *            [-- nextUnit --]
      */
-    const fitTail = prevSize.x2 >= nextSize.x1 && prevSize.x2 <= nextSize.x2;
+    const fitTail =
+      prevSize[position2] >= nextSize[position1] &&
+      prevSize[position2] <= nextSize[position2];
 
     return fitInTailHead || fitHead || fitTail;
   }
@@ -248,13 +278,12 @@ export class Stack {
     options: { prev: boolean }
   ): Unit | undefined {
     const unitSize = this.createSize(lookUp.unit);
-    const { indexY } = lookUp;
 
     // last item
-    if (indexY === this.items.length - 1 && !options.prev) return;
+    if (lookUp.indexY === this.items.length - 1 && !options.prev) return;
 
     // first item for reverse
-    if (indexY === 0 && options.prev) return;
+    if (lookUp.indexY === 0 && options.prev) return;
 
     let unitCandidate: undefined | Unit;
     const items = options.prev ? [...this.items].reverse() : this.items;
@@ -267,7 +296,7 @@ export class Stack {
 
       if (!isSameRow && filterConstraint) {
         const fitsUnit = row.items.find((unitItem) =>
-          this.unitsOverlapPosition(unitItem, lookUp.unit)
+          this.unitsOverlapPosition(unitItem, lookUp.unit, "y")
         );
 
         if (fitsUnit) {
@@ -281,17 +310,18 @@ export class Stack {
     if (unitCandidate) return unitCandidate;
 
     /**
-     * still not found, so find closer one
+     * still not found, so find the closest one
      */
     if (options.prev) {
-      let indexAttempt = indexY;
+      let indexAttempt = lookUp.indexY;
 
       while (!unitCandidate && indexAttempt > 0) {
         indexAttempt--;
 
         const closerUnit = this.rowFindCloserUnit(
           this.items[indexAttempt],
-          lookUp.unit
+          lookUp.unit,
+          "y"
         );
 
         if (closerUnit) {
@@ -299,14 +329,89 @@ export class Stack {
         }
       }
     } else {
-      let indexAttempt = indexY;
+      let indexAttempt = lookUp.indexY;
 
       while (!unitCandidate && indexAttempt < this.items.length - 1) {
         indexAttempt++;
 
         const closerUnit = this.rowFindCloserUnit(
           this.items[indexAttempt],
-          lookUp.unit
+          lookUp.unit,
+          "y"
+        );
+
+        if (closerUnit) {
+          unitCandidate = closerUnit;
+        }
+      }
+    }
+
+    return unitCandidate;
+  }
+
+  public findRow(
+    lookUp: UnitIndex,
+    options: { prev: boolean }
+  ): Unit | undefined {
+    // const unitSize = this.createSize(lookUp.unit);
+    // TODO - last item and first item
+    // Compare if it fits in the max head and max tail
+
+    // Same row
+    const nextItemSameLine =
+      this.items[lookUp.indexY].items[lookUp.indexX + (options.prev ? -1 : 1)];
+    if (nextItemSameLine) {
+      return nextItemSameLine;
+    }
+
+    let unitCandidate: undefined | Unit;
+
+    // Next rows
+    for (let index = lookUp.indexY - 1; index < this.items.length; index++) {
+      const row = this.items[index];
+
+      const fitsUnit = row.items.find((unitItem) =>
+        this.unitsOverlapPosition(unitItem, lookUp.unit, "x")
+      );
+
+      if (fitsUnit) {
+        unitCandidate = fitsUnit;
+
+        break;
+      }
+    }
+
+    if (unitCandidate) return unitCandidate;
+
+    /**
+     * still not found, so find the closest one
+     */
+    if (options.prev) {
+      let indexAttempt = lookUp.indexY - 1;
+
+      while (!unitCandidate && indexAttempt > 0) {
+        indexAttempt--;
+
+        const closerUnit = this.rowFindCloserUnit(
+          this.items[indexAttempt],
+          lookUp.unit,
+          "x"
+        );
+
+        if (closerUnit) {
+          unitCandidate = closerUnit;
+        }
+      }
+    } else {
+      let indexAttempt = lookUp.indexY + 1;
+
+      while (!unitCandidate && indexAttempt < this.items.length - 1) {
+        indexAttempt++;
+
+        const closerUnit = this.rowFindCloserUnit(
+          this.items[indexAttempt],
+          lookUp.unit,
+          "x"
         );
 
         if (closerUnit) {
@@ -319,6 +424,6 @@ export class Stack {
   }
 
   private log(): void {
-    console.log(this.items);
+    // console.log(this.items);
   }
 }

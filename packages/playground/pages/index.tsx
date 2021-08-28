@@ -12,7 +12,7 @@ const App: React.FC = () => {
   return (
     <NavigationProvider>
       <style>{`[data-focus-visible-added] {
-    outline: 2px solid #d71ef7;
+    outline: 2px solid #7B61FF;
 }
  `}</style>
       <div

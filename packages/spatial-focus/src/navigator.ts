@@ -8,17 +8,17 @@ export enum Direction {
 }
 
 class Navigator {
-  getCurrentItem(data: Stack): UnitIndex | undefined {
+  private getCurrentItem(data: Stack): UnitIndex | undefined {
     const focusItem = document.activeElement;
 
     return data.findUnitByNode(focusItem);
   }
 
-  unselectNode(node: HTMLElement): void {
+  private unselectNode(node: HTMLElement): void {
     node.blur();
   }
 
-  selectNode(oldUnit: Unit | undefined, unit: Unit): void {
+  private selectNode(oldUnit: Unit | undefined, unit: Unit): void {
     if (oldUnit) {
       this.unselectNode(oldUnit.node);
     }
@@ -30,7 +30,7 @@ class Navigator {
     });
   }
 
-  goTo(
+  public goTo(
     data: Stack,
     direction: Direction,
     from?: HTMLElement
@@ -47,7 +47,7 @@ class Navigator {
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const candidate = currentItem! ?? fromItem!;
-    const { unit: prevUnit, indexX, indexY } = candidate;
+    const { unit: prevUnit } = candidate;
 
     let newItem: HTMLElement | undefined;
 
@@ -75,19 +75,23 @@ class Navigator {
       }
 
       case Direction.RIGHT: {
-        const unit = data.findByIndex(indexX + 1, indexY);
-        this.selectNode(prevUnit, unit);
+        const unit = data.findRow(candidate, { prev: false });
 
-        newItem = unit.node;
+        if (unit) {
+          this.selectNode(prevUnit, unit);
+          newItem = unit.node;
+        }
 
         break;
       }
 
       case Direction.LEFT: {
-        const unit = data.findByIndex(indexX - 1, indexY);
-        this.selectNode(prevUnit, unit);
+        const unit = data.findRow(candidate, { prev: true });
 
-        newItem = unit.node;
+        if (unit) {
+          this.selectNode(prevUnit, unit);
+          newItem = unit.node;
+        }
 
         break;
       }
