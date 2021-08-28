@@ -55,7 +55,7 @@ class Row {
     });
 
     const lastItem = this.items[this.items.length - 1];
-    this.head = this.items[0].position;
+    this.head = { x: this.items[0].position.x, y: this.items[0].position.y };
     this.tail = {
       x: lastItem.position.x + lastItem.position.width,
       y: lastItem.position.y + lastItem.position.height,
@@ -92,7 +92,10 @@ export class Stack {
     const fitIndex = this.items.findIndex((row) => {
       const { tail, head } = row;
 
-      return unit.position.y >= head.y && unit.position.y <= tail.y;
+      return (
+        unit.position.y >= head.y &&
+        unit.position.y + unit.position.height <= tail.y
+      );
     });
 
     if (fitIndex > -1) {
@@ -320,6 +323,6 @@ export class Stack {
   }
 
   private log(): void {
-    console.log(this.items, this.nodeList);
+    console.log(this.items);
   }
 }
