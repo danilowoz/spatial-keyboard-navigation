@@ -123,6 +123,7 @@ export class Stack {
       this.addToItems(node);
     });
 
+    this.calculateBoundaries();
     this.log();
   }
 
@@ -349,13 +350,39 @@ export class Stack {
     return unitCandidate;
   }
 
+  private minHead = Infinity;
+  private maxTail = -Infinity;
+
+  private calculateBoundaries() {
+    let lenMin = this.items.length;
+    let lenMix = this.items.length;
+
+    // Find min head
+    while (lenMin--) {
+      if (this.items[lenMin].head.x < this.minHead) {
+        this.minHead = this.items[lenMin].head.x;
+      }
+    }
+
+    // Find max tail
+    while (lenMix--) {
+      if (this.items[lenMix].tail.x > this.maxTail) {
+        this.maxTail = this.items[lenMix].tail.x;
+      }
+    }
+  }
+
   public findRow(
     lookUp: UnitIndex,
     options: { prev: boolean }
   ): Unit | undefined {
-    // const unitSize = this.createSize(lookUp.unit);
-    // TODO - last item and first item
-    // Compare if it fits in the max head and max tail
+    const unitSize = this.createSize(lookUp.unit);
+
+    // First
+    if (unitSize.x1 === this.minHead && options.prev) return;
+
+    // Last
+    if (unitSize.x2 === this.maxTail && !options.prev) return;
 
     // Same row
     const nextItemSameLine =
