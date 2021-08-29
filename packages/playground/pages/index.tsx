@@ -7,7 +7,7 @@ import Main from "../components/Main";
 import { useState } from "react";
 
 const App: React.FC = () => {
-  const [currentItem, setCurrentItem] = useState(0);
+  const [currentItem, setCurrentItem] = useState(2);
 
   return (
     <NavigationProvider>

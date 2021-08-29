@@ -67,6 +67,28 @@ export class Stack {
   private items: Row[] = [];
   private nodeList: HTMLElement[] = [];
 
+  private minHead = Infinity;
+  private maxTail = -Infinity;
+
+  private calculateBoundaries() {
+    let lenMin = this.items.length;
+    let lenMix = this.items.length;
+
+    // Find min head
+    while (lenMin--) {
+      if (this.items[lenMin].head.x < this.minHead) {
+        this.minHead = this.items[lenMin].head.x;
+      }
+    }
+
+    // Find max tail
+    while (lenMix--) {
+      if (this.items[lenMix].tail.x > this.maxTail) {
+        this.maxTail = this.items[lenMix].tail.x;
+      }
+    }
+  }
+
   private getPosition(node: HTMLElement): Position {
     const { x, y, width, height } = node.getBoundingClientRect();
 
@@ -243,9 +265,8 @@ export class Stack {
     const prevSize = this.createSize(prevUnit);
     const nextSize = this.createSize(nextUnit);
 
-    const invertDirection = direction === "x" ? "y" : "x";
-    const position1 = `${invertDirection}1` as keyof Size;
-    const position2 = `${invertDirection}2` as keyof Size;
+    const position1 = `${direction}1` as keyof Size;
+    const position2 = `${direction}2` as keyof Size;
 
     /**
      * [-- prevUnit --]
@@ -297,7 +318,7 @@ export class Stack {
 
       if (!isSameRow && filterConstraint) {
         const fitsUnit = row.items.find((unitItem) =>
-          this.unitsOverlapPosition(unitItem, lookUp.unit, "y")
+          this.unitsOverlapPosition(unitItem, lookUp.unit, "x")
         );
 
         if (fitsUnit) {
@@ -350,28 +371,6 @@ export class Stack {
     return unitCandidate;
   }
 
-  private minHead = Infinity;
-  private maxTail = -Infinity;
-
-  private calculateBoundaries() {
-    let lenMin = this.items.length;
-    let lenMix = this.items.length;
-
-    // Find min head
-    while (lenMin--) {
-      if (this.items[lenMin].head.x < this.minHead) {
-        this.minHead = this.items[lenMin].head.x;
-      }
-    }
-
-    // Find max tail
-    while (lenMix--) {
-      if (this.items[lenMix].tail.x > this.maxTail) {
-        this.maxTail = this.items[lenMix].tail.x;
-      }
-    }
-  }
-
   public findRow(
     lookUp: UnitIndex,
     options: { prev: boolean }
@@ -399,8 +398,10 @@ export class Stack {
         ? [...this.items[index].items].reverse()
         : this.items[index].items;
 
-      const fitsUnit = items.find((unitItem) =>
-        this.unitsOverlapPosition(unitItem, lookUp.unit, "x")
+      const fitsUnit = items.find(
+        (unitItem) =>
+          this.unitsOverlapPosition(unitItem, lookUp.unit, "y") &&
+          !this.unitsOverlapPosition(unitItem, lookUp.unit, "x")
       );
 
       if (fitsUnit) {
@@ -416,7 +417,7 @@ export class Stack {
      * still not found, so find the closest one
      */
     if (options.prev) {
-      let indexAttempt = lookUp.indexY - 1;
+      let indexAttempt = lookUp.indexY;
 
       while (!unitCandidate && indexAttempt > 0) {
         indexAttempt--;
@@ -428,11 +429,19 @@ export class Stack {
         );
 
         if (closerUnit) {
-          unitCandidate = closerUnit;
+          const overlap = this.unitsOverlapPosition(
+            closerUnit,
+            lookUp.unit,
+            "x"
+          );
+
+          if (!overlap) {
+            unitCandidate = closerUnit;
+          }
         }
       }
     } else {
-      let indexAttempt = lookUp.indexY + 1;
+      let indexAttempt = lookUp.indexY;
 
       while (!unitCandidate && indexAttempt < this.items.length - 1) {
         indexAttempt++;
@@ -444,7 +453,15 @@ export class Stack {
         );
 
         if (closerUnit) {
-          unitCandidate = closerUnit;
+          const overlap = this.unitsOverlapPosition(
+            closerUnit,
+            lookUp.unit,
+            "x"
+          );
+
+          if (!overlap) {
+            unitCandidate = closerUnit;
+          }
         }
       }
     }
