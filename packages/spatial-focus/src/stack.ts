@@ -395,9 +395,11 @@ export class Stack {
 
     // Next rows
     for (let index = lookUp.indexY - 1; index < this.items.length; index++) {
-      const row = this.items[index];
+      const items = options.prev
+        ? [...this.items[index].items].reverse()
+        : this.items[index].items;
 
-      const fitsUnit = row.items.find((unitItem) =>
+      const fitsUnit = items.find((unitItem) =>
         this.unitsOverlapPosition(unitItem, lookUp.unit, "x")
       );
 
