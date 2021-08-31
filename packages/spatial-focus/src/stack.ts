@@ -70,6 +70,16 @@ export class Stack {
   private minHead = Infinity;
   private maxTail = -Infinity;
 
+  // TODO - Turn an util
+  private createSize(unit: Unit): Size {
+    return {
+      x1: unit.position.x,
+      x2: unit.position.x + unit.position.width,
+      y1: unit.position.y,
+      y2: unit.position.y + unit.position.height,
+    };
+  }
+
   private calculateBoundaries() {
     let lenMin = this.items.length;
     let lenMix = this.items.length;
@@ -89,6 +99,7 @@ export class Stack {
     }
   }
 
+  // TODO - Turn an util
   private getPosition(node: HTMLElement): Position {
     const { x, y, width, height } = node.getBoundingClientRect();
 
@@ -190,15 +201,7 @@ export class Stack {
     return { unit, indexX, indexY };
   }
 
-  private createSize(unit: Unit): Size {
-    return {
-      x1: unit.position.x,
-      x2: unit.position.x + unit.position.width,
-      y1: unit.position.y,
-      y2: unit.position.y + unit.position.height,
-    };
-  }
-
+  // TODO - Turn an util
   private rowFindCloserUnit(
     row: Row,
     unit: Unit,
@@ -213,15 +216,12 @@ export class Stack {
     const unitSize = this.createSize(unit);
 
     for (const itemRow of row.items) {
-      if (itemRow === unit) return unitCandidate;
+      if (itemRow === unit) return;
 
       if (unitCandidate) {
         const candidateSize = this.createSize(unitCandidate);
         const itemRowSize = this.createSize(itemRow);
 
-        /**
-         * As it never overlaps, it must be on the right of left
-         */
         if (itemRowSize[position1] > unitSize[position1]) {
           /**
            * Right / Bottom
@@ -255,6 +255,7 @@ export class Stack {
     return unitCandidate;
   }
 
+  // TODO - Turn an util
   private unitsOverlapPosition(
     prevUnit: Unit,
     nextUnit: Unit,
@@ -392,77 +393,43 @@ export class Stack {
 
     let unitCandidate: undefined | Unit;
 
-    // Next rows
-    for (let index = lookUp.indexY - 1; index < this.items.length; index++) {
+    const findInRow = (index: number) => {
       const items = options.prev
         ? [...this.items[index].items].reverse()
         : this.items[index].items;
 
-      const fitsUnit = items.find(
+      // return this.rowFindCloserUnit(this.items[index], lookUp.unit, "y");
+
+      return items.find(
         (unitItem) =>
           this.unitsOverlapPosition(unitItem, lookUp.unit, "y") &&
           !this.unitsOverlapPosition(unitItem, lookUp.unit, "x")
       );
-
-      if (fitsUnit) {
-        unitCandidate = fitsUnit;
-
-        break;
-      }
-    }
-
-    if (unitCandidate) return unitCandidate;
+    };
 
     /**
-     * still not found, so find the closest one
+     * Visit the closest rows, a previous one and a next, one at time
+     * and then try to find a Unit that satisfy the conditional
      */
-    if (options.prev) {
-      let indexAttempt = lookUp.indexY;
+    let prevIndex = lookUp.indexY;
+    let nextIndex = lookUp.indexY;
 
-      while (!unitCandidate && indexAttempt > 0) {
-        indexAttempt--;
+    while (
+      !unitCandidate &&
+      (prevIndex > 0 || nextIndex < this.items.length - 1)
+    ) {
+      // Do prev
+      if (prevIndex > 0) {
+        prevIndex--;
 
-        const closerUnit = this.rowFindCloserUnit(
-          this.items[indexAttempt],
-          lookUp.unit,
-          "x"
-        );
-
-        if (closerUnit) {
-          const overlap = this.unitsOverlapPosition(
-            closerUnit,
-            lookUp.unit,
-            "x"
-          );
-
-          if (!overlap) {
-            unitCandidate = closerUnit;
-          }
-        }
+        unitCandidate = findInRow(prevIndex);
       }
-    } else {
-      let indexAttempt = lookUp.indexY;
 
-      while (!unitCandidate && indexAttempt < this.items.length - 1) {
-        indexAttempt++;
+      // Do next
+      if (!unitCandidate && nextIndex < this.items.length - 1) {
+        nextIndex++;
 
-        const closerUnit = this.rowFindCloserUnit(
-          this.items[indexAttempt],
-          lookUp.unit,
-          "x"
-        );
-
-        if (closerUnit) {
-          const overlap = this.unitsOverlapPosition(
-            closerUnit,
-            lookUp.unit,
-            "x"
-          );
-
-          if (!overlap) {
-            unitCandidate = closerUnit;
-          }
-        }
+        unitCandidate = findInRow(prevIndex);
       }
     }
 

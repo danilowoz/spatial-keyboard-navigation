@@ -2,7 +2,7 @@ import { NavigationAnchor } from "spatial-focus-react";
 
 const Header: React.FC = () => {
   return (
-    <header className="col-span-3 p-5 flex justify-between">
+    <header className="col-span-4 p-5 flex justify-between">
       <NavigationAnchor>
         <a href="" className="text-gray-500">
           Reminder

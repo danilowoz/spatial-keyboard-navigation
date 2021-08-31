@@ -4,6 +4,7 @@ import "show-keys";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 import Main from "../components/Main";
+import Options from "../components/Options";
 import { useState } from "react";
 
 const App: React.FC = () => {
@@ -16,12 +17,13 @@ const App: React.FC = () => {
 }
  `}</style>
       <div
-        className="grid grid-cols-3 h-screen"
+        className="grid grid-cols-4 h-screen"
         style={{ gridTemplateRows: "5em 1fr" }}
       >
         <Header />
         <Sidebar onClick={setCurrentItem} />
         <Main currentItem={currentItem} />
+        <Options />
       </div>
     </NavigationProvider>
   );
