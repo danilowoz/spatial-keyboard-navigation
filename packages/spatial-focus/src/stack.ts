@@ -1,6 +1,13 @@
-type Position = Record<"x" | "y" | "width" | "height", number>;
+import {
+  createSize,
+  getPosition,
+  rowFindCloserUnit,
+  unitsOverlapPosition,
+} from "./utils";
+
+export type Position = Record<"x" | "y" | "width" | "height", number>;
 type TailHead = Record<"x" | "y", number>;
-type Size = Record<"x1" | "x2" | "y1" | "y2", number>;
+
 export type UnitIndex = { unit: Unit; indexX: number; indexY: number };
 
 export class Unit {
@@ -13,7 +20,7 @@ export class Unit {
   }
 }
 
-class Row {
+export class Row {
   items: Unit[] = [];
 
   head: TailHead = { x: 0, y: 0 };
@@ -70,16 +77,6 @@ export class Stack {
   private minHead = Infinity;
   private maxTail = -Infinity;
 
-  // TODO - Turn an util
-  private createSize(unit: Unit): Size {
-    return {
-      x1: unit.position.x,
-      x2: unit.position.x + unit.position.width,
-      y1: unit.position.y,
-      y2: unit.position.y + unit.position.height,
-    };
-  }
-
   private calculateBoundaries() {
     let lenMin = this.items.length;
     let lenMix = this.items.length;
@@ -99,15 +96,8 @@ export class Stack {
     }
   }
 
-  // TODO - Turn an util
-  private getPosition(node: HTMLElement): Position {
-    const { x, y, width, height } = node.getBoundingClientRect();
-
-    return { x, y, width, height };
-  }
-
   private addToItems(node: HTMLElement) {
-    const position = this.getPosition(node);
+    const position = getPosition(node);
     const unit = new Unit(node, position);
 
     if (this.items.length === 0) {
@@ -201,106 +191,11 @@ export class Stack {
     return { unit, indexX, indexY };
   }
 
-  // TODO - Turn an util
-  private rowFindCloserUnit(
-    row: Row,
-    unit: Unit,
-    direction: "x" | "y"
-  ): Unit | undefined {
-    let unitCandidate: undefined | Unit;
-
-    const invertDirection = direction === "x" ? "y" : "x";
-    const position1 = `${invertDirection}1` as keyof Size;
-    const position2 = `${invertDirection}2` as keyof Size;
-
-    const unitSize = this.createSize(unit);
-
-    for (const itemRow of row.items) {
-      if (itemRow === unit) return;
-
-      if (unitCandidate) {
-        const candidateSize = this.createSize(unitCandidate);
-        const itemRowSize = this.createSize(itemRow);
-
-        if (itemRowSize[position1] > unitSize[position1]) {
-          /**
-           * Right / Bottom
-           */
-          const diffCandidateToUnit =
-            unitSize[position1] - candidateSize[position2];
-          const diffItemRowToUnit =
-            itemRowSize[position1] - unitSize[position2];
-
-          if (diffItemRowToUnit < diffCandidateToUnit) {
-            unitCandidate = itemRow;
-          }
-        } else {
-          /**
-           * Left / Top
-           */
-          const diffCandidateToUnit =
-            unitSize[position1] - candidateSize[position2];
-          const diffItemRowToUnit =
-            itemRowSize[position2] - unitSize[position1];
-
-          if (diffItemRowToUnit < diffCandidateToUnit) {
-            unitCandidate = itemRow;
-          }
-        }
-      } else {
-        unitCandidate = itemRow;
-      }
-    }
-
-    return unitCandidate;
-  }
-
-  // TODO - Turn an util
-  private unitsOverlapPosition(
-    prevUnit: Unit,
-    nextUnit: Unit,
-    direction: "x" | "y"
-  ): boolean {
-    if (prevUnit === nextUnit) return false;
-
-    const prevSize = this.createSize(prevUnit);
-    const nextSize = this.createSize(nextUnit);
-
-    const position1 = `${direction}1` as keyof Size;
-    const position2 = `${direction}2` as keyof Size;
-
-    /**
-     * [-- prevUnit --]
-     * [-- nextUnit --]
-     */
-    const fitInTailHead =
-      nextSize[position1] >= prevSize[position1] &&
-      nextSize[position2] <= prevSize[position2];
-
-    /**
-     *     [-- prevUnit --]
-     * [-- nextUnit --]
-     */
-    const fitHead =
-      prevSize[position1] >= nextSize[position1] &&
-      prevSize[position1] <= nextSize[position2];
-
-    /**
-     *  [-- prevUnit --]
-     *            [-- nextUnit --]
-     */
-    const fitTail =
-      prevSize[position2] >= nextSize[position1] &&
-      prevSize[position2] <= nextSize[position2];
-
-    return fitInTailHead || fitHead || fitTail;
-  }
-
   public findColumn(
     lookUp: UnitIndex,
     options: { prev: boolean }
   ): Unit | undefined {
-    const unitSize = this.createSize(lookUp.unit);
+    const unitSize = createSize(lookUp.unit);
 
     // last item
     if (lookUp.indexY === this.items.length - 1 && !options.prev) return;
@@ -319,7 +214,7 @@ export class Stack {
 
       if (!isSameRow && filterConstraint) {
         const fitsUnit = row.items.find((unitItem) =>
-          this.unitsOverlapPosition(unitItem, lookUp.unit, "x")
+          unitsOverlapPosition(unitItem, lookUp.unit, "x")
         );
 
         if (fitsUnit) {
@@ -341,7 +236,7 @@ export class Stack {
       while (!unitCandidate && indexAttempt > 0) {
         indexAttempt--;
 
-        const closerUnit = this.rowFindCloserUnit(
+        const closerUnit = rowFindCloserUnit(
           this.items[indexAttempt],
           lookUp.unit,
           "y"
@@ -357,7 +252,7 @@ export class Stack {
       while (!unitCandidate && indexAttempt < this.items.length - 1) {
         indexAttempt++;
 
-        const closerUnit = this.rowFindCloserUnit(
+        const closerUnit = rowFindCloserUnit(
           this.items[indexAttempt],
           lookUp.unit,
           "y"
@@ -376,7 +271,7 @@ export class Stack {
     lookUp: UnitIndex,
     options: { prev: boolean }
   ): Unit | undefined {
-    const unitSize = this.createSize(lookUp.unit);
+    const unitSize = createSize(lookUp.unit);
 
     // First
     if (unitSize.x1 === this.minHead && options.prev) return;
@@ -402,8 +297,8 @@ export class Stack {
 
       return items.find(
         (unitItem) =>
-          this.unitsOverlapPosition(unitItem, lookUp.unit, "y") &&
-          !this.unitsOverlapPosition(unitItem, lookUp.unit, "x")
+          unitsOverlapPosition(unitItem, lookUp.unit, "y") &&
+          !unitsOverlapPosition(unitItem, lookUp.unit, "x")
       );
     };
 
