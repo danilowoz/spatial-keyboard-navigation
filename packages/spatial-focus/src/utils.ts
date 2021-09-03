@@ -2,7 +2,7 @@ import { Position, Row, Unit } from "./stack";
 
 type Size = Record<"x1" | "x2" | "y1" | "y2", number>;
 
-function unitsOverlapPosition(
+function unitsOverlap(
   prevUnit: Unit,
   nextUnit: Unit,
   direction: "x" | "y"
@@ -52,13 +52,11 @@ function createBoundaries(unit: Unit): Size {
 }
 
 function getPosition(node: HTMLElement): Position {
-  const { x, y, width, height } = node.getBoundingClientRect();
-
-  return { x, y, width, height };
+  return node.getBoundingClientRect();
 }
 
 function rowFindCloserUnit(
-  row: Row,
+  items: Row["items"],
   unit: Unit,
   direction: "x" | "y"
 ): Unit | undefined {
@@ -70,7 +68,7 @@ function rowFindCloserUnit(
 
   const unitSize = createBoundaries(unit);
 
-  for (const itemRow of row.items) {
+  for (const itemRow of items) {
     if (itemRow === unit) return;
 
     if (unitCandidate) {
@@ -108,9 +106,4 @@ function rowFindCloserUnit(
   return unitCandidate;
 }
 
-export {
-  unitsOverlapPosition,
-  createBoundaries,
-  getPosition,
-  rowFindCloserUnit,
-};
+export { unitsOverlap, createBoundaries, getPosition, rowFindCloserUnit };
