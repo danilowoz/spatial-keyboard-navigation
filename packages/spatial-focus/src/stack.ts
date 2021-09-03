@@ -1,4 +1,4 @@
-import { createSize, getPosition, unitsOverlapPosition } from "./utils";
+import { createBoundaries, getPosition, unitsOverlapPosition } from "./utils";
 
 export type Position = Record<"x" | "y" | "width" | "height", number>;
 type TailHead = Record<"x" | "y", number>;
@@ -215,41 +215,19 @@ export class Stack {
     }
 
     return unitCandidate;
-
-    /**
-     * still not found, so find the closest one
-     */
-    // indexAttempt = lookUp.indexY;
-    // while (
-    //   !unitCandidate &&
-    //   (options.prev ? indexAttempt >= 0 : indexAttempt < this.items.length - 1)
-    // ) {
-    //   if (options.prev) {
-    //     indexAttempt--;
-    //   } else {
-    //     indexAttempt++;
-    //   }
-
-    //   unitCandidate = rowFindCloserUnit(
-    //     this.items[indexAttempt],
-    //     lookUp.unit,
-    //     "y"
-    //   );
-    // }
-    // return unitCandidate;
   }
 
   public findRow(
     lookUp: UnitIndex,
     options: { prev: boolean }
   ): Unit | undefined {
-    const unitSize = createSize(lookUp.unit);
+    const unitBoundaries = createBoundaries(lookUp.unit);
 
     // First
-    if (unitSize.x1 === this.minHead && options.prev) return;
+    if (unitBoundaries.x1 === this.minHead && options.prev) return;
 
     // Last
-    if (unitSize.x2 === this.maxTail && !options.prev) return;
+    if (unitBoundaries.x2 === this.maxTail && !options.prev) return;
 
     // Same row
     const nextItemSameLine =
@@ -275,7 +253,7 @@ export class Stack {
     };
 
     /**
-     * Visit the closest rows, a previous one and a next, one at time
+     * Visit the closest rows, a previous and a next one, one at time
      * and then try to find a Unit that satisfy the conditional
      */
     let prevIndex = lookUp.indexY;
@@ -283,10 +261,10 @@ export class Stack {
 
     while (
       !unitCandidate &&
-      (prevIndex > 0 || nextIndex < this.items.length - 1)
+      (prevIndex >= 0 || nextIndex < this.items.length - 1)
     ) {
       // Do prev
-      if (prevIndex > 0) {
+      if (prevIndex >= 0) {
         prevIndex--;
 
         unitCandidate = findInRow(prevIndex);
