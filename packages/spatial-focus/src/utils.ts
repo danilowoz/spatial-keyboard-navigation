@@ -56,7 +56,7 @@ function getPosition(node: HTMLElement): Position {
 }
 
 function rowFindCloserUnit(
-  items: Row["items"],
+  units: Row["units"],
   unit: Unit,
   direction: "x" | "y"
 ): Unit | undefined {
@@ -68,7 +68,7 @@ function rowFindCloserUnit(
 
   const unitSize = createBoundaries(unit);
 
-  for (const itemRow of items) {
+  for (const itemRow of units) {
     if (itemRow === unit) return;
 
     if (unitCandidate) {

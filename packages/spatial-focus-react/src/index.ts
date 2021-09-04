@@ -11,7 +11,7 @@ import {
 } from "react";
 import React = require("react");
 
-const NavigationAnchor: FC = ({ children }) => {
+const Anchor: FC = ({ children }) => {
   type MaybeButton = HTMLElement & { disabled: boolean };
   const ref = useRef<MaybeButton>();
 
@@ -23,9 +23,7 @@ const NavigationAnchor: FC = ({ children }) => {
     if (ref.current && !ref.current.disabled) {
       const removeItem = stack.add(ref.current);
 
-      return () => {
-        removeItem();
-      };
+      return removeItem;
     }
 
     return () => null;
@@ -42,16 +40,14 @@ const NavigationAnchor: FC = ({ children }) => {
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-const NavigationProvider: React.FC = ({ children }) => {
+const Provider: React.FC = ({ children }) => {
   useEffect(() => {
     const remove = initEventListener();
 
-    return () => {
-      remove();
-    };
+    return remove;
   }, []);
 
   return children;
 };
 
-export { NavigationAnchor, NavigationProvider };
+export { Anchor, Provider };

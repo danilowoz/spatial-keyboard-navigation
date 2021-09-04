@@ -1,5 +1,5 @@
 import LIST from "./data";
-import { NavigationAnchor } from "spatial-focus-react";
+import { Anchor } from "spatial-focus-react";
 
 const Main: React.FC<{ currentItem: number }> = ({ currentItem }) => {
   return (
@@ -10,7 +10,7 @@ const Main: React.FC<{ currentItem: number }> = ({ currentItem }) => {
 
       <div>
         {LIST[currentItem].todo.map((e) => (
-          <NavigationAnchor key={e.text}>
+          <Anchor key={e.text}>
             <button className="py-4 border-b border-solid border-gray-100 flex items-center w-full">
               <div
                 className={`w-5 h-5 rounded-full mr-2 ${
@@ -19,7 +19,7 @@ const Main: React.FC<{ currentItem: number }> = ({ currentItem }) => {
               />
               <p className="text-gray-500">{e.text}</p>
             </button>
-          </NavigationAnchor>
+          </Anchor>
         ))}
       </div>
     </div>

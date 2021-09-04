@@ -1,4 +1,4 @@
-import { NavigationProvider } from "spatial-focus-react";
+import { Provider } from "spatial-focus-react";
 
 import "show-keys";
 import Sidebar from "../components/Sidebar";
@@ -8,10 +8,10 @@ import Options from "../components/Options";
 import { useState } from "react";
 
 const App: React.FC = () => {
-  const [currentItem, setCurrentItem] = useState(2);
+  const [currentItem, setCurrentItem] = useState(8);
 
   return (
-    <NavigationProvider>
+    <Provider>
       <style>{`[data-focus-visible-added] {
     outline: 2px solid #7B61FF;
 }
@@ -25,7 +25,7 @@ const App: React.FC = () => {
         <Main currentItem={currentItem} />
         <Options />
       </div>
-    </NavigationProvider>
+    </Provider>
   );
 };
 

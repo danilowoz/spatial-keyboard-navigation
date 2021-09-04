@@ -6,46 +6,41 @@ import {
 } from "./utils";
 
 export type Position = Record<"x" | "y" | "width" | "height", number>;
-
 export type UnitIndex = { unit: Unit; indexX: number; indexY: number };
 
 export class Unit {
-  position: Position;
-  node: HTMLElement;
-
-  constructor(node: HTMLElement, position: Position) {
+  constructor(public node: HTMLElement, public position: Position) {
     this.node = node;
     this.position = position;
   }
 }
 
 export class Row {
-  items: Unit[] = [];
+  public units: Unit[] = [];
 
-  head: Record<"x" | "y", number> = { x: 0, y: 0 };
-  tail: Record<"x" | "y", number> = { x: 0, y: 0 };
+  public head: Record<"x" | "y", number> = { x: 0, y: 0 };
+  public tail: Record<"x" | "y", number> = { x: 0, y: 0 };
 
   public findByIndex(index: number): Unit {
-    const indexOrLast = Math.min(Math.max(index, 0), this.items.length - 1);
+    const indexOrLast = Math.min(Math.max(index, 0), this.units.length - 1);
 
-    return this.items[indexOrLast];
+    return this.units[indexOrLast];
   }
 
   public add(unit: Unit): void {
-    if (this.items.length === 0) {
-      this.items = [unit];
+    if (this.units.length === 0) {
+      this.units = [unit];
 
-      this.head = unit.position;
-      this.tail = {
-        x: unit.position.x + unit.position.width,
-        y: unit.position.y + unit.position.height,
-      };
+      const boundaries = createBoundaries(unit);
+
+      this.head = { x: boundaries.x1, y: boundaries.y1 };
+      this.tail = { x: boundaries.x2, y: boundaries.y2 };
 
       return;
     }
 
-    const newItems = [...this.items, unit];
-    this.items = newItems.sort((a, b) => {
+    const newItems = [...this.units, unit];
+    this.units = newItems.sort((a, b) => {
       const sizeA = a.position.x + a.position.width;
       const sizeB = b.position.x + b.position.width;
 
@@ -60,55 +55,55 @@ export class Row {
       return 0;
     });
 
-    const lastItem = this.items[this.items.length - 1];
-    this.head = { x: this.items[0].position.x, y: this.items[0].position.y };
-    this.tail = {
-      x: lastItem.position.x + lastItem.position.width,
-      y: lastItem.position.y + lastItem.position.height,
-    };
+    const lastItem = this.units[this.units.length - 1];
+    const firstItemBoundaries = createBoundaries(this.units[0]);
+    const lastItemBoundaries = createBoundaries(lastItem);
+
+    this.head = { x: firstItemBoundaries.x1, y: firstItemBoundaries.y1 };
+    this.tail = { x: lastItemBoundaries.x2, y: lastItemBoundaries.y2 };
   }
 }
 
 export class Stack {
-  private items: Row[] = [];
+  private rows: Row[] = [];
   private nodeList: HTMLElement[] = [];
 
   private minHead = Infinity;
   private maxTail = -Infinity;
 
   private calculateBoundaries() {
-    let lenMin = this.items.length;
-    let lenMix = this.items.length;
+    let lenMin = this.rows.length;
+    let lenMix = this.rows.length;
 
     // Find min head
     while (lenMin--) {
-      if (this.items[lenMin].head.x < this.minHead) {
-        this.minHead = this.items[lenMin].head.x;
+      if (this.rows[lenMin].head.x < this.minHead) {
+        this.minHead = this.rows[lenMin].head.x;
       }
     }
 
     // Find max tail
     while (lenMix--) {
-      if (this.items[lenMix].tail.x > this.maxTail) {
-        this.maxTail = this.items[lenMix].tail.x;
+      if (this.rows[lenMix].tail.x > this.maxTail) {
+        this.maxTail = this.rows[lenMix].tail.x;
       }
     }
   }
 
-  private addToItems(node: HTMLElement) {
+  private addToRows(node: HTMLElement) {
     const position = getPosition(node);
     const unit = new Unit(node, position);
 
-    if (this.items.length === 0) {
+    if (this.rows.length === 0) {
       const row = new Row();
       row.add(unit);
 
-      this.items = [row];
+      this.rows = [row];
 
       return;
     }
 
-    const fitIndex = this.items.findIndex((row) => {
+    const fitIndex = this.rows.findIndex((row) => {
       const { tail, head } = row;
 
       return (
@@ -118,15 +113,15 @@ export class Stack {
     });
 
     if (fitIndex > -1) {
-      this.items[fitIndex].add(unit);
+      this.rows[fitIndex].add(unit);
       return;
     }
 
     const row = new Row();
     row.add(unit);
 
-    const newItems = [...this.items, row];
-    this.items = newItems.sort((a, b) => {
+    const newItems = [...this.rows, row];
+    this.rows = newItems.sort((a, b) => {
       if (a.head.y < b.head.y) {
         return -1;
       }
@@ -139,10 +134,10 @@ export class Stack {
   }
 
   private repositionAll(): void {
-    this.items = [];
+    this.rows = [];
 
     this.nodeList.forEach((node) => {
-      this.addToItems(node);
+      this.addToRows(node);
     });
 
     this.calculateBoundaries();
@@ -153,17 +148,15 @@ export class Stack {
     this.nodeList.push(node);
     this.repositionAll();
 
-    const removeItem = () => {
+    return () => {
       this.nodeList = this.nodeList.filter((cacheNode) => cacheNode !== node);
       this.repositionAll();
     };
-
-    return removeItem;
   }
 
   public findByIndex(x: number, y: number): Unit {
-    const indexOrLast = Math.min(Math.max(y, 0), this.items.length - 1);
-    const row = this.items[indexOrLast];
+    const indexOrLast = Math.min(Math.max(y, 0), this.rows.length - 1);
+    const row = this.rows[indexOrLast];
 
     return row.findByIndex(x);
   }
@@ -171,23 +164,27 @@ export class Stack {
   public findUnitByNode(node?: Element | null): UnitIndex | undefined {
     if (!node) return undefined;
 
-    let unit: Unit | undefined;
-    let indexX = -1;
-    let indexY = -1;
+    let payload: undefined | UnitIndex;
 
-    this.items.forEach((row, itemIndexY) => {
-      row.items.forEach((item, itemIndexX) => {
+    for (let itemIndexY = 0; itemIndexY < this.rows.length; itemIndexY++) {
+      const row = this.rows[itemIndexY];
+
+      for (let itemIndexX = 0; itemIndexX < row.units.length; itemIndexX++) {
+        const item = row.units[itemIndexX];
+
         if (item.node === node) {
-          unit = item;
-          indexX = itemIndexX;
-          indexY = itemIndexY;
+          payload = {
+            unit: item,
+            indexX: itemIndexX,
+            indexY: itemIndexY,
+          };
+
+          break;
         }
-      });
-    });
+      }
+    }
 
-    if (!unit) return undefined;
-
-    return { unit, indexX, indexY };
+    return payload;
   }
 
   public findColumn(
@@ -195,7 +192,7 @@ export class Stack {
     options: { prev: boolean }
   ): Unit | undefined {
     // last item
-    if (lookUp.indexY === this.items.length - 1 && !options.prev) return;
+    if (lookUp.indexY === this.rows.length - 1 && !options.prev) return;
 
     // first item for reverse
     if (lookUp.indexY === 0 && options.prev) return;
@@ -205,7 +202,7 @@ export class Stack {
 
     while (
       !unitCandidate &&
-      (options.prev ? indexAttempt > 0 : indexAttempt < this.items.length - 1)
+      (options.prev ? indexAttempt > 0 : indexAttempt < this.rows.length - 1)
     ) {
       if (options.prev) {
         indexAttempt--;
@@ -213,7 +210,7 @@ export class Stack {
         indexAttempt++;
       }
 
-      unitCandidate = this.items[indexAttempt].items.find((unitItem) =>
+      unitCandidate = this.rows[indexAttempt].units.find((unitItem) =>
         unitsOverlap(unitItem, lookUp.unit, "x")
       );
     }
@@ -235,7 +232,7 @@ export class Stack {
 
     // Same row
     const nextItemSameLine =
-      this.items[lookUp.indexY].items[lookUp.indexX + (options.prev ? -1 : 1)];
+      this.rows[lookUp.indexY].units[lookUp.indexX + (options.prev ? -1 : 1)];
     if (nextItemSameLine) {
       return nextItemSameLine;
     }
@@ -251,12 +248,12 @@ export class Stack {
 
     while (
       !unitCandidate &&
-      (prevIndex > 0 || nextIndex < this.items.length - 1)
+      (prevIndex > 0 || nextIndex < this.rows.length - 1)
     ) {
       const findInRow = (index: number) => {
         const items = options.prev
-          ? [...this.items[index].items].reverse()
-          : this.items[index].items;
+          ? [...this.rows[index].units].reverse()
+          : this.rows[index].units;
 
         return items.find((unitItem) => {
           const itemBoundaries = createBoundaries(unitItem);
@@ -273,18 +270,18 @@ export class Stack {
         });
       };
 
-      // Do next
-      if (nextIndex < this.items.length - 1) {
-        nextIndex++;
-
-        unitCandidate = findInRow(nextIndex);
-      }
-
       // Do prev
       if (prevIndex > 0) {
         prevIndex--;
 
-        const nextCandidate = findInRow(prevIndex);
+        unitCandidate = findInRow(prevIndex);
+      }
+
+      // Do next
+      if (nextIndex < this.rows.length - 1) {
+        nextIndex++;
+
+        const nextCandidate = findInRow(nextIndex);
 
         if (nextCandidate && unitCandidate) {
           // Compare which one is the closest one
@@ -303,6 +300,6 @@ export class Stack {
   }
 
   private log(): void {
-    // console.log(this.items);
+    console.log(this.rows.length, this.nodeList.length);
   }
 }
