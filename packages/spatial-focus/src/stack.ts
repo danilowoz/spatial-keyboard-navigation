@@ -18,8 +18,8 @@ export class Unit {
 export class Row {
   public units: Unit[] = [];
 
-  public head: Record<"x" | "y", number> = { x: 0, y: 0 };
-  public tail: Record<"x" | "y", number> = { x: 0, y: 0 };
+  public head: Record<"x" | "y", number> = { x: Infinity, y: Infinity };
+  public tail: Record<"x" | "y", number> = { x: -Infinity, y: -Infinity };
 
   public findByIndex(index: number): Unit {
     const indexOrLast = Math.min(Math.max(index, 0), this.units.length - 1);
@@ -30,50 +30,62 @@ export class Row {
   public add(unit: Unit): void {
     if (this.units.length === 0) {
       this.units = [unit];
+    } else {
+      const newItems = [...this.units, unit];
+      this.units = newItems.sort((a, b) => {
+        const sizeA = a.position.x + a.position.width;
+        const sizeB = b.position.x + b.position.width;
 
-      const boundaries = createBoundaries(unit);
+        if (sizeA < sizeB) {
+          return -1;
+        }
 
-      this.head = { x: boundaries.x1, y: boundaries.y1 };
-      this.tail = { x: boundaries.x2, y: boundaries.y2 };
+        if (sizeA > sizeB) {
+          return 1;
+        }
 
-      return;
+        return 0;
+      });
     }
 
-    const newItems = [...this.units, unit];
-    this.units = newItems.sort((a, b) => {
-      const sizeA = a.position.x + a.position.width;
-      const sizeB = b.position.x + b.position.width;
+    this.calculateBoundaries("x");
+    this.calculateBoundaries("y");
+  }
 
-      if (sizeA < sizeB) {
-        return -1;
+  private calculateBoundaries(direction: "x" | "y") {
+    let lenMin = this.units.length;
+    let lenMax = this.units.length;
+
+    // Find min head
+    while (lenMin--) {
+      if (this.units[lenMin].position[direction] < this.head[direction]) {
+        this.head[direction] = this.units[lenMin].position[direction];
       }
+    }
 
-      if (sizeA > sizeB) {
-        return 1;
+    // Find max tail
+    while (lenMax--) {
+      const tail =
+        this.units[lenMax].position[direction] +
+        this.units[lenMax].position[direction === "x" ? "width" : "height"];
+
+      if (tail > this.tail[direction]) {
+        this.tail[direction] = tail;
       }
-
-      return 0;
-    });
-
-    const lastItem = this.units[this.units.length - 1];
-    const firstItemBoundaries = createBoundaries(this.units[0]);
-    const lastItemBoundaries = createBoundaries(lastItem);
-
-    this.head = { x: firstItemBoundaries.x1, y: firstItemBoundaries.y1 };
-    this.tail = { x: lastItemBoundaries.x2, y: lastItemBoundaries.y2 };
+    }
   }
 }
 
 export class Stack {
   private rows: Row[] = [];
-  private nodeList: HTMLElement[] = [];
+  private nodeList: Unit[] = [];
 
   private minHead = Infinity;
   private maxTail = -Infinity;
 
   private calculateBoundaries() {
     let lenMin = this.rows.length;
-    let lenMix = this.rows.length;
+    let lenMax = this.rows.length;
 
     // Find min head
     while (lenMin--) {
@@ -83,17 +95,14 @@ export class Stack {
     }
 
     // Find max tail
-    while (lenMix--) {
-      if (this.rows[lenMix].tail.x > this.maxTail) {
-        this.maxTail = this.rows[lenMix].tail.x;
+    while (lenMax--) {
+      if (this.rows[lenMax].tail.x > this.maxTail) {
+        this.maxTail = this.rows[lenMax].tail.x;
       }
     }
   }
 
-  private addToRows(node: HTMLElement) {
-    const position = getPosition(node);
-    const unit = new Unit(node, position);
-
+  private addToRows(unit: Unit) {
     if (this.rows.length === 0) {
       const row = new Row();
       row.add(unit);
@@ -133,23 +142,43 @@ export class Stack {
     });
   }
 
+  private sortNodeList(): void {
+    this.nodeList.sort((a, b) => {
+      if (a.position.height < b.position.height) {
+        return 1;
+      }
+      if (a.position.height > b.position.height) {
+        return -1;
+      }
+
+      return 0;
+    });
+  }
+
   private repositionAll(): void {
     this.rows = [];
 
-    this.nodeList.forEach((node) => {
-      this.addToRows(node);
+    this.nodeList.forEach((unit) => {
+      this.addToRows(unit);
     });
 
     this.calculateBoundaries();
-    this.log();
+    this.debug();
   }
 
   public add(node: HTMLElement): () => void {
-    this.nodeList.push(node);
+    const position = getPosition(node);
+    const unit = new Unit(node, position);
+
+    this.nodeList.push(unit);
+    this.sortNodeList();
     this.repositionAll();
 
     return () => {
-      this.nodeList = this.nodeList.filter((cacheNode) => cacheNode !== node);
+      this.nodeList = this.nodeList.filter(
+        (cacheNode) => cacheNode.node !== node
+      );
+      this.sortNodeList();
       this.repositionAll();
     };
   }
@@ -299,7 +328,40 @@ export class Stack {
     return unitCandidate;
   }
 
-  private log(): void {
-    console.log(this.rows.length, this.nodeList.length);
+  private debug(): void {
+    console.log(this.rows);
+    const prevContainer = document.querySelector(".container-debug");
+
+    if (prevContainer) {
+      prevContainer.remove();
+    }
+
+    const body = document.querySelector("body");
+    const container = document.createElement("div");
+
+    container.className = "container-debug";
+    container.style.position = "absolute";
+    container.style.top = `0px`;
+    container.style.left = `0px`;
+    container.style.right = `0px`;
+    container.style.bottom = `0px`;
+
+    for (let index = 0; index < this.rows.length; index++) {
+      const row = this.rows[index];
+
+      const placeholder = document.createElement("div");
+      placeholder.style.position = "absolute";
+      placeholder.style.width = `${row.tail.x - row.head.x}px`;
+      placeholder.style.height = `${row.tail.y - row.head.y}px`;
+      placeholder.style.top = `${row.head.y}px`;
+      placeholder.style.left = `${row.head.x}px`;
+
+      placeholder.style.backgroundColor = `rgba(255,200,0,.1)`;
+      placeholder.textContent = `${index}`;
+
+      container?.append(placeholder);
+    }
+
+    body?.append(container);
   }
 }

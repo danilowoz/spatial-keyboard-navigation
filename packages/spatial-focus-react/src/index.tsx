@@ -1,19 +1,47 @@
 import { initStack, initEventListener } from "spatial-focus";
 
-import {
+import React, {
   FC,
   Children,
   createElement,
+  createContext,
   isValidElement,
   useEffect,
   useRef,
   ReactElement,
+  useContext,
+  useState,
 } from "react";
-import React = require("react");
+
+const useAreaContext = () => useContext(AreaProvider);
+
+const Area: FC = ({ children }) => {
+  const [parent, setParent] = useState<HTMLElement>();
+
+  Children.only(children);
+
+  return (
+    <AreaProvider.Provider value={{ parent }}>
+      {
+        Children.map(children, (child) => {
+          if (isValidElement(child)) {
+            return createElement(child.type, {
+              ...child.props,
+              ref: setParent,
+            });
+          }
+
+          return child;
+        }) as unknown as ReactElement
+      }
+    </AreaProvider.Provider>
+  );
+};
 
 const Anchor: FC = ({ children }) => {
   type MaybeButton = HTMLElement & { disabled: boolean };
   const ref = useRef<MaybeButton>();
+  useAreaContext();
 
   Children.only(children);
 
@@ -38,6 +66,10 @@ const Anchor: FC = ({ children }) => {
   }) as unknown as ReactElement;
 };
 
+const AreaProvider = createContext<{ parent?: HTMLElement }>({
+  parent: undefined,
+});
+
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 const Provider: React.FC = ({ children }) => {
@@ -47,7 +79,9 @@ const Provider: React.FC = ({ children }) => {
     return remove;
   }, []);
 
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   return children;
 };
 
-export { Anchor, Provider };
+export { Anchor, Area, Provider };
