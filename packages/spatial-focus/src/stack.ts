@@ -10,16 +10,22 @@ export type UnitIndex = { unit: Unit; indexX: number; indexY: number };
 export type Type = "area" | "item";
 
 export class Unit {
+  public children?: Stack;
+
   constructor(
     public node: HTMLElement,
     public position: Position,
     public type: Type,
-    public parent?: HTMLElement
+    public parent?: Unit
   ) {
     this.node = node;
     this.position = position;
     this.type = type;
     this.parent = parent;
+
+    if (type === "area") {
+      this.children = new Stack();
+    }
   }
 }
 
@@ -174,13 +180,9 @@ export class Stack {
     // this.debug();
   }
 
-  public add(
-    node: HTMLElement,
-    type: Type,
-    parentNode?: HTMLElement
-  ): () => void {
+  public add(node: HTMLElement, type: Type, parentUnit?: Unit): () => void {
     const position = getPosition(node);
-    const unit = new Unit(node, position, type, parentNode);
+    const unit = new Unit(node, position, type, parentUnit);
 
     this.nodeList.push(unit);
     this.sortNodeList();
@@ -199,16 +201,19 @@ export class Stack {
     const indexOrLast = Math.min(Math.max(y, 0), this.rows.length - 1);
     const row = this.rows[indexOrLast];
 
-    return row.findByIndex(x);
+    return row?.findByIndex(x);
   }
 
-  public findUnitByNode(node?: Element | null): UnitIndex | undefined {
+  public findUnitByNode(
+    node?: Element | null,
+    rows: Row[] = this.rows
+  ): UnitIndex | undefined {
     if (!node) return undefined;
 
     let payload: undefined | UnitIndex;
 
-    for (let itemIndexY = 0; itemIndexY < this.rows.length; itemIndexY++) {
-      const row = this.rows[itemIndexY];
+    for (let itemIndexY = 0; itemIndexY < rows.length; itemIndexY++) {
+      const row = rows[itemIndexY];
 
       for (let itemIndexX = 0; itemIndexX < row.units.length; itemIndexX++) {
         const item = row.units[itemIndexX];
@@ -221,6 +226,12 @@ export class Stack {
           };
 
           break;
+        } else if (item.children) {
+          const childrenUnit = this.findUnitByNode(node, item.children.rows);
+
+          if (childrenUnit) {
+            payload = childrenUnit;
+          }
         }
       }
     }

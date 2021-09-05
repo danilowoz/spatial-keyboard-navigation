@@ -9,7 +9,7 @@ import React, {
   useEffect,
   useRef,
   ReactElement,
-  // useContext,
+  useContext,
   useState,
 } from "react";
 
@@ -20,25 +20,12 @@ const AreaProvider = createContext<{ parent?: HTMLElement }>({
   parent: undefined,
 });
 
-// const useAreaContext = () => useContext(AreaProvider);
+const useAreaContext = () => useContext(AreaProvider);
 
 const Area: FC = ({ children }) => {
   const [ref, setParent] = useState<HTMLElement>();
 
   Children.only(children);
-
-  useEffect(() => {
-    const areas = initAreas();
-
-    if (ref) {
-      const removeItem = areas.add(ref, "area");
-
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-      return removeItem;
-    }
-
-    return () => null;
-  }, [ref]);
 
   return (
     <AreaProvider.Provider value={{ parent: ref }}>
@@ -64,21 +51,34 @@ const Area: FC = ({ children }) => {
 const Anchor: FC = ({ children }) => {
   type MaybeButton = HTMLElement & { disabled: boolean };
   const ref = useRef<MaybeButton>();
-  // const { parent } = useAreaContext();
+  const { parent } = useAreaContext();
 
   Children.only(children);
 
-  // useEffect(() => {
-  //   const stack = initStack();
+  useEffect(() => {
+    if (!parent || !ref) return;
 
-  //   if (ref.current && !ref.current.disabled) {
-  //     const removeItem = stack.add(ref.current, parent);
+    const stack = initAreas();
 
-  //     return removeItem;
-  //   }
+    if (!stack.findUnitByNode(parent)) {
+      stack.add(parent, "area");
+    }
 
-  //   return () => null;
-  // }, [parent]);
+    const unit = stack.findUnitByNode(parent);
+
+    if (ref.current && !ref.current.disabled) {
+      const removeItem = unit?.unit.children?.add(
+        ref.current,
+        "item",
+        unit.unit
+      );
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+      return removeItem;
+    }
+
+    return;
+  }, [parent]);
 
   return Children.map(children, (child) => {
     if (isValidElement(child)) {

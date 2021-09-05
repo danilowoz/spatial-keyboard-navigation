@@ -18,11 +18,21 @@ const initEventListener = (): (() => void) => {
     const areas = initAreas();
     const nav = new Navigator();
 
-    console.log(areas);
-
     switch (key) {
       case "Escape":
-        lastItemVisited = nav.goTo(areas, Direction.AREA, lastItemVisited);
+        lastItemVisited = nav.goTo(
+          areas,
+          Direction.LEAVE_AREA,
+          lastItemVisited
+        );
+
+        break;
+      case "Enter":
+        lastItemVisited = nav.goTo(
+          areas,
+          Direction.ENTER_AREA,
+          lastItemVisited
+        );
 
         break;
       case "ArrowUp":

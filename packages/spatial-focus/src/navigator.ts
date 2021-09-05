@@ -5,7 +5,8 @@ export enum Direction {
   RIGHT,
   DOWN,
   LEFT,
-  AREA,
+  ENTER_AREA,
+  LEAVE_AREA,
 }
 
 class Navigator {
@@ -53,14 +54,17 @@ class Navigator {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const candidate = currentItem! ?? fromItem!;
+    const candidate = fromItem! ?? currentItem!;
     const { unit: prevUnit } = candidate;
+
+    const stackCandidate =
+      data.findUnitByNode(candidate.unit.parent?.node)?.unit.children ?? data;
 
     let newItem: HTMLElement | undefined;
 
     switch (direction) {
       case Direction.DOWN: {
-        const unit = data.findColumn(candidate, { prev: false });
+        const unit = stackCandidate.findColumn(candidate, { prev: false });
 
         if (unit) {
           this.selectNode(prevUnit, unit);
@@ -71,7 +75,7 @@ class Navigator {
       }
 
       case Direction.UP: {
-        const unit = data.findColumn(candidate, { prev: true });
+        const unit = stackCandidate.findColumn(candidate, { prev: true });
 
         if (unit) {
           this.selectNode(prevUnit, unit);
@@ -82,7 +86,7 @@ class Navigator {
       }
 
       case Direction.RIGHT: {
-        const unit = data.findRow(candidate, { prev: false });
+        const unit = stackCandidate.findRow(candidate, { prev: false });
 
         if (unit) {
           this.selectNode(prevUnit, unit);
@@ -93,7 +97,7 @@ class Navigator {
       }
 
       case Direction.LEFT: {
-        const unit = data.findRow(candidate, { prev: true });
+        const unit = stackCandidate.findRow(candidate, { prev: true });
 
         if (unit) {
           this.selectNode(prevUnit, unit);
@@ -103,14 +107,26 @@ class Navigator {
         break;
       }
 
-      // case Direction.AREA: {
-      //   const area = candidate.unit.parent;
+      case Direction.ENTER_AREA: {
+        const childrenStack = stackCandidate.findUnitByNode(prevUnit.node);
+        const childrenUnit = childrenStack?.unit.children?.findByIndex(0, 0);
 
-      //   if (area) {
-      //     this.unselectNode(prevUnit.node);
-      //     this.selectNode(area);
-      //   }
-      // }
+        if (childrenStack && childrenUnit) {
+          this.selectNode(prevUnit, childrenUnit);
+          newItem = childrenUnit.node;
+        }
+
+        break;
+      }
+
+      case Direction.LEAVE_AREA: {
+        if (candidate.unit.parent) {
+          this.selectNode(prevUnit, candidate.unit.parent);
+          newItem = candidate.unit.parent.node;
+        }
+
+        break;
+      }
     }
 
     return newItem;
