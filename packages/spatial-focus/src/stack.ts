@@ -288,7 +288,7 @@ export class Stack {
           const itemBoundaries = createBoundaries(unitItem);
 
           const constraint = options.prev
-            ? itemBoundaries.x1 < unitBoundaries.x2
+            ? itemBoundaries.x2 < unitBoundaries.x1
             : itemBoundaries.x1 > unitBoundaries.x2;
 
           return (
@@ -357,6 +357,7 @@ export class Stack {
       placeholder.style.left = `${row.head.x}px`;
 
       placeholder.style.backgroundColor = `rgba(255,200,0,.1)`;
+      placeholder.style.border = `1px solid rgba(255,200,0,.1)`;
       placeholder.textContent = `${index}`;
 
       container?.append(placeholder);

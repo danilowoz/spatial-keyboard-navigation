@@ -62,9 +62,8 @@ function rowFindCloserUnit(
 ): Unit | undefined {
   let unitCandidate: undefined | Unit;
 
-  const invertDirection = direction === "x" ? "y" : "x";
-  const position1 = `${invertDirection}1` as keyof Size;
-  const position2 = `${invertDirection}2` as keyof Size;
+  const position1 = `${direction}1` as keyof Size;
+  const position2 = `${direction}2` as keyof Size;
 
   const unitSize = createBoundaries(unit);
 
@@ -80,7 +79,7 @@ function rowFindCloserUnit(
          * Right / Bottom
          */
         const diffCandidateToUnit =
-          unitSize[position1] - candidateSize[position2];
+          candidateSize[position1] - unitSize[position2];
         const diffItemRowToUnit = itemRowSize[position1] - unitSize[position2];
 
         if (diffItemRowToUnit < diffCandidateToUnit) {
@@ -92,7 +91,7 @@ function rowFindCloserUnit(
          */
         const diffCandidateToUnit =
           unitSize[position1] - candidateSize[position2];
-        const diffItemRowToUnit = itemRowSize[position2] - unitSize[position1];
+        const diffItemRowToUnit = unitSize[position1] - itemRowSize[position2];
 
         if (diffItemRowToUnit < diffCandidateToUnit) {
           unitCandidate = itemRow;
