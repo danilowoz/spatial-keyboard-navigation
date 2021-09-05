@@ -5,29 +5,36 @@ export enum Direction {
   RIGHT,
   DOWN,
   LEFT,
+  AREA,
 }
 
 class Navigator {
   private getCurrentItem(data: Stack): UnitIndex | undefined {
+    const focusArea = document.querySelector(".area-selected");
     const focusItem = document.activeElement;
 
-    return data.findUnitByNode(focusItem);
+    return data.findUnitByNode(focusArea ?? focusItem);
   }
 
-  private unselectNode(node: HTMLElement): void {
+  private unselectItem(node: HTMLElement): void {
     node.blur();
+    node.classList.remove("area-selected");
   }
 
   private selectNode(oldUnit: Unit | undefined, unit: Unit): void {
     if (oldUnit) {
-      this.unselectNode(oldUnit.node);
+      this.unselectItem(oldUnit.node);
     }
 
-    unit.node.focus();
+    if (unit.type === "item") {
+      unit.node.focus();
 
-    unit.node.addEventListener("blur", () => {
-      this.unselectNode(unit.node);
-    });
+      unit.node.addEventListener("blur", () => {
+        this.unselectItem(unit.node);
+      });
+    } else if (unit.type === "area") {
+      unit.node.classList.add("area-selected");
+    }
   }
 
   public goTo(
@@ -95,6 +102,15 @@ class Navigator {
 
         break;
       }
+
+      // case Direction.AREA: {
+      //   const area = candidate.unit.parent;
+
+      //   if (area) {
+      //     this.unselectNode(prevUnit.node);
+      //     this.selectNode(area);
+      //   }
+      // }
     }
 
     return newItem;

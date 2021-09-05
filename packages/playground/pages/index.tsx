@@ -12,7 +12,7 @@ const App: React.FC = () => {
 
   return (
     <Provider>
-      <style>{`[data-focus-visible-added] {
+      <style>{`.area-selected,[data-focus-visible-added] {
     outline: 2px solid #7B61FF;
 }
  `}</style>

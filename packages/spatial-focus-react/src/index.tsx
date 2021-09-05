@@ -1,4 +1,4 @@
-import { initStack, initEventListener } from "spatial-focus";
+import { initAreas, initEventListener } from "spatial-focus";
 
 import React, {
   FC,
@@ -9,19 +9,39 @@ import React, {
   useEffect,
   useRef,
   ReactElement,
-  useContext,
+  // useContext,
   useState,
 } from "react";
 
-const useAreaContext = () => useContext(AreaProvider);
+/**
+ * Area
+ */
+const AreaProvider = createContext<{ parent?: HTMLElement }>({
+  parent: undefined,
+});
+
+// const useAreaContext = () => useContext(AreaProvider);
 
 const Area: FC = ({ children }) => {
-  const [parent, setParent] = useState<HTMLElement>();
+  const [ref, setParent] = useState<HTMLElement>();
 
   Children.only(children);
 
+  useEffect(() => {
+    const areas = initAreas();
+
+    if (ref) {
+      const removeItem = areas.add(ref, "area");
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+      return removeItem;
+    }
+
+    return () => null;
+  }, [ref]);
+
   return (
-    <AreaProvider.Provider value={{ parent }}>
+    <AreaProvider.Provider value={{ parent: ref }}>
       {
         Children.map(children, (child) => {
           if (isValidElement(child)) {
@@ -38,24 +58,27 @@ const Area: FC = ({ children }) => {
   );
 };
 
+/**
+ * Anchor
+ */
 const Anchor: FC = ({ children }) => {
   type MaybeButton = HTMLElement & { disabled: boolean };
   const ref = useRef<MaybeButton>();
-  useAreaContext();
+  // const { parent } = useAreaContext();
 
   Children.only(children);
 
-  useEffect(() => {
-    const stack = initStack();
+  // useEffect(() => {
+  //   const stack = initStack();
 
-    if (ref.current && !ref.current.disabled) {
-      const removeItem = stack.add(ref.current);
+  //   if (ref.current && !ref.current.disabled) {
+  //     const removeItem = stack.add(ref.current, parent);
 
-      return removeItem;
-    }
+  //     return removeItem;
+  //   }
 
-    return () => null;
-  }, []);
+  //   return () => null;
+  // }, [parent]);
 
   return Children.map(children, (child) => {
     if (isValidElement(child)) {
@@ -66,10 +89,9 @@ const Anchor: FC = ({ children }) => {
   }) as unknown as ReactElement;
 };
 
-const AreaProvider = createContext<{ parent?: HTMLElement }>({
-  parent: undefined,
-});
-
+/**
+ * Provider
+ */
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 const Provider: React.FC = ({ children }) => {
@@ -79,8 +101,7 @@ const Provider: React.FC = ({ children }) => {
     return remove;
   }, []);
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return children;
 };
 

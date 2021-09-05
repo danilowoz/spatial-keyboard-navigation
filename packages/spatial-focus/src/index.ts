@@ -1,38 +1,44 @@
 import { Stack } from "./stack";
 import { Direction, Navigator } from "./navigator";
 
-let dataStructureInstance: null | Stack;
-const initStack = (): Stack => {
-  if (dataStructureInstance) {
-    return dataStructureInstance;
+let areasInstance: null | Stack;
+const initAreas = (): Stack => {
+  if (areasInstance) {
+    return areasInstance;
   }
 
-  dataStructureInstance = new Stack();
+  areasInstance = new Stack();
 
-  return dataStructureInstance;
+  return areasInstance;
 };
 
 let lastItemVisited: HTMLElement | undefined;
 const initEventListener = (): (() => void) => {
   const handler = ({ key }: { key: string }) => {
-    const data = initStack();
+    const areas = initAreas();
     const nav = new Navigator();
 
+    console.log(areas);
+
     switch (key) {
+      case "Escape":
+        lastItemVisited = nav.goTo(areas, Direction.AREA, lastItemVisited);
+
+        break;
       case "ArrowUp":
-        lastItemVisited = nav.goTo(data, Direction.UP, lastItemVisited);
+        lastItemVisited = nav.goTo(areas, Direction.UP, lastItemVisited);
 
         break;
       case "ArrowRight":
-        lastItemVisited = nav.goTo(data, Direction.RIGHT, lastItemVisited);
+        lastItemVisited = nav.goTo(areas, Direction.RIGHT, lastItemVisited);
 
         break;
       case "ArrowDown":
-        lastItemVisited = nav.goTo(data, Direction.DOWN, lastItemVisited);
+        lastItemVisited = nav.goTo(areas, Direction.DOWN, lastItemVisited);
 
         break;
       case "ArrowLeft":
-        lastItemVisited = nav.goTo(data, Direction.LEFT, lastItemVisited);
+        lastItemVisited = nav.goTo(areas, Direction.LEFT, lastItemVisited);
 
         break;
     }
@@ -46,4 +52,4 @@ const initEventListener = (): (() => void) => {
   };
 };
 
-export { initStack, initEventListener };
+export { initAreas, initEventListener };

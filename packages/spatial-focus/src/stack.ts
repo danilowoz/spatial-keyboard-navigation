@@ -7,11 +7,19 @@ import {
 
 export type Position = Record<"x" | "y" | "width" | "height", number>;
 export type UnitIndex = { unit: Unit; indexX: number; indexY: number };
+export type Type = "area" | "item";
 
 export class Unit {
-  constructor(public node: HTMLElement, public position: Position) {
+  constructor(
+    public node: HTMLElement,
+    public position: Position,
+    public type: Type,
+    public parent?: HTMLElement
+  ) {
     this.node = node;
     this.position = position;
+    this.type = type;
+    this.parent = parent;
   }
 }
 
@@ -163,12 +171,16 @@ export class Stack {
     });
 
     this.calculateBoundaries();
-    this.debug();
+    // this.debug();
   }
 
-  public add(node: HTMLElement): () => void {
+  public add(
+    node: HTMLElement,
+    type: Type,
+    parentNode?: HTMLElement
+  ): () => void {
     const position = getPosition(node);
-    const unit = new Unit(node, position);
+    const unit = new Unit(node, position, type, parentNode);
 
     this.nodeList.push(unit);
     this.sortNodeList();
@@ -328,7 +340,7 @@ export class Stack {
     return unitCandidate;
   }
 
-  private debug(): void {
+  public debug(): void {
     console.log(this.rows);
     const prevContainer = document.querySelector(".container-debug");
 
