@@ -1,6 +1,7 @@
 import { Fragment } from "react";
 import { Area, Anchor } from "spatial-focus-react";
 import LIST from "./data";
+import ContextMenuDemo from "./ContextDemo";
 
 const Options: React.FC<{ area?: boolean }> = ({ area }) => {
   const MaybeArea = area ? Area : Fragment;
@@ -27,15 +28,17 @@ const Options: React.FC<{ area?: boolean }> = ({ area }) => {
         </Anchor>
 
         <p className="text-md text-gray-500 mt-4 mb-2">Related tasks</p>
-        {LIST.map((item) => {
-          return (
-            <Anchor key={item.title}>
-              <button className="bg-gray-50 block w-full text-left mb-2 px-2 py-1 rounded-md text-sm text-gray-500 hover:text-gray-900 hover:bg-gray-100">
-                {item.title}
-              </button>
-            </Anchor>
-          );
-        })}
+        <ContextMenuDemo>
+          {LIST.map((item) => {
+            return (
+              <Anchor key={item.title}>
+                <button className="bg-gray-50 block w-full text-left mb-2 px-2 py-1 rounded-md text-sm text-gray-500 hover:text-gray-900 hover:bg-gray-100">
+                  {item.title}
+                </button>
+              </Anchor>
+            );
+          })}
+        </ContextMenuDemo>
       </div>
     </MaybeArea>
   );

@@ -17,13 +17,31 @@ class Navigator {
   areaClassName = "area-selected";
 
   /**
+   * The Element which currently has focus,
+   * expect body or null if there is no focused element
+   */
+  private getValidActiveElement() {
+    const active = document.activeElement;
+
+    if (active === null) return;
+    if (active === document.body) return;
+
+    return active;
+  }
+
+  /**
    * Get the select node and returns its unit from the Stack
    */
-  private getCurrentItem(data: Stack): ItemIndex | undefined {
+  private getActiveUnit(data: Stack): ItemIndex | undefined {
+    const focusItem = this.getValidActiveElement();
     const focusArea = document.querySelector(`.${this.areaClassName}`);
-    const focusItem = document.activeElement;
 
-    return data.findByNode(focusArea ?? focusItem);
+    // Prevent duplicate selection
+    if (focusItem && focusArea) {
+      this.unselectItem(focusArea as HTMLElement);
+    }
+
+    return data.findByNode(focusItem ?? focusArea);
   }
 
   /**
@@ -62,13 +80,30 @@ class Navigator {
     direction: Direction,
     from?: HTMLElement
   ): HTMLElement | undefined {
-    const currentItem = this.getCurrentItem(stack);
+    const activeUnit = this.getActiveUnit(stack);
     const fromItem = stack.findByNode(from);
 
     /**
-     * First interaction, so set the first Unit as selected
+     * Third-parties support - the active element doesn't belong to a stack
      */
-    if (!currentItem && !fromItem) {
+    if (this.getValidActiveElement() && !activeUnit) return;
+
+    /**
+     * Probably this is the first interaction,
+     * so set the first Unit as selected
+     */
+    if (!activeUnit && !fromItem) {
+      /**
+       * Prevent Esc and Enter select an item
+       */
+      const validDirection = [
+        Direction.UP,
+        Direction.RIGHT,
+        Direction.DOWN,
+        Direction.LEFT,
+      ].includes(direction);
+      if (!validDirection) return;
+
       const unit = stack?.findByIndex(0, 0);
 
       if (unit) {
@@ -78,7 +113,7 @@ class Navigator {
       return;
     }
 
-    const candidate = fromItem! ?? currentItem!;
+    const candidate = fromItem! ?? activeUnit!;
     const { unit: prevUnit } = candidate;
 
     /**
