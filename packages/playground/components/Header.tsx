@@ -1,8 +1,11 @@
+import { Fragment } from "react";
 import { Anchor, Area } from "spatial-focus-react";
 
-const Header: React.FC = () => {
+const Header: React.FC<{ area?: boolean }> = ({ area }) => {
+  const MaybeArea = area ? Area : Fragment;
+
   return (
-    <Area>
+    <MaybeArea>
       <header className="col-span-4 p-5 flex justify-between">
         <Anchor>
           <a href="" className="text-gray-500">
@@ -16,7 +19,7 @@ const Header: React.FC = () => {
           </button>
         </Anchor>
       </header>
-    </Area>
+    </MaybeArea>
   );
 };
 

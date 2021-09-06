@@ -1,9 +1,12 @@
+import { Fragment } from "react";
 import { Area, Anchor } from "spatial-focus-react";
 import LIST from "./data";
 
-const Options: React.FC = () => {
+const Options: React.FC<{ area?: boolean }> = ({ area }) => {
+  const MaybeArea = area ? Area : Fragment;
+
   return (
-    <Area>
+    <MaybeArea>
       <div className="row-span-3 px-5">
         <p className="text-md text-gray-500 font-medium mb-2">Title</p>
         <Anchor>
@@ -34,7 +37,7 @@ const Options: React.FC = () => {
           );
         })}
       </div>
-    </Area>
+    </MaybeArea>
   );
 };
 

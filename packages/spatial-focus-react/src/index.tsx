@@ -1,4 +1,4 @@
-import { initAreas, initEventListener } from "spatial-focus";
+import { initAreas, initEventListener, UnitType } from "spatial-focus";
 
 import React, {
   FC,
@@ -14,7 +14,7 @@ import React, {
 } from "react";
 
 /**
- * Area
+ * Area - collect the parent ref
  */
 const AreaProvider = createContext<{ parent?: HTMLElement }>({
   parent: undefined,
@@ -46,7 +46,8 @@ const Area: FC = ({ children }) => {
 };
 
 /**
- * Anchor
+ * Anchor - collect the children ref and its parent-are element
+ * Also, it register the ref in the Stack
  */
 const Anchor: FC = ({ children }) => {
   type MaybeButton = HTMLElement & { disabled: boolean };
@@ -56,25 +57,40 @@ const Anchor: FC = ({ children }) => {
   Children.only(children);
 
   useEffect(() => {
-    if (!parent || !ref) return;
+    if (!ref) return;
 
     const stack = initAreas();
 
-    if (!stack.findUnitByNode(parent)) {
-      stack.add(parent, "area");
+    /**
+     * If there is Area in the parent, but this is the
+     * first time to interact with, register the area first
+     */
+    if (parent && !stack.findByNode(parent)) {
+      stack.register(parent, UnitType.AREA);
     }
 
-    const unit = stack.findUnitByNode(parent);
-
     if (ref.current && !ref.current.disabled) {
-      const removeItem = unit?.unit.children?.add(
-        ref.current,
-        "item",
-        unit.unit
-      );
+      /**
+       * Register the clickable in the area
+       */
+      if (parent) {
+        const { unit: parentUnit } = stack.findByNode(parent)!;
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-      return removeItem;
+        const removeItem = parentUnit.children?.register(
+          ref.current,
+          UnitType.CLICKABLE,
+          parentUnit
+        );
+
+        return removeItem;
+      } else {
+        /**
+         * Register the clickable without any area
+         */
+        const removeItem = stack.register(ref.current, UnitType.CLICKABLE);
+
+        return removeItem;
+      }
     }
 
     return;
@@ -90,18 +106,16 @@ const Anchor: FC = ({ children }) => {
 };
 
 /**
- * Provider
+ * Provider - manage the listeners
  */
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 const Provider: React.FC = ({ children }) => {
   useEffect(() => {
     const remove = initEventListener();
 
     return remove;
-  }, []);
+  });
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return children;
 };
 

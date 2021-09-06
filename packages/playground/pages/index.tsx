@@ -20,10 +20,10 @@ const App: React.FC = () => {
         className="grid grid-cols-4 h-screen"
         style={{ gridTemplateRows: "5em 1fr" }}
       >
-        <Header />
-        <Sidebar onClick={setCurrentItem} />
-        <Main currentItem={currentItem} />
-        <Options />
+        <Header area />
+        <Sidebar area onClick={setCurrentItem} />
+        <Main area currentItem={currentItem} />
+        <Options area />
       </div>
     </Provider>
   );

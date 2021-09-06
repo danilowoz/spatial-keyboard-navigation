@@ -1,9 +1,15 @@
 import LIST from "./data";
 import { Area, Anchor } from "spatial-focus-react";
+import { Fragment } from "react";
 
-const Main: React.FC<{ currentItem: number }> = ({ currentItem }) => {
+const Main: React.FC<{ currentItem: number; area?: boolean }> = ({
+  currentItem,
+  area,
+}) => {
+  const MaybeArea = area ? Area : Fragment;
+
   return (
-    <Area>
+    <MaybeArea>
       <div className="col-span-2 px-4 overflow-scroll">
         <p className="text-gray-500 font-medium text-2xl mb-6">
           {LIST[currentItem].title}
@@ -26,7 +32,7 @@ const Main: React.FC<{ currentItem: number }> = ({ currentItem }) => {
           ))}
         </div>
       </div>
-    </Area>
+    </MaybeArea>
   );
 };
 

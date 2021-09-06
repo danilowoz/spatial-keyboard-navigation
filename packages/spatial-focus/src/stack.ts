@@ -6,16 +6,23 @@ import {
 } from "./utils";
 
 export type Position = Record<"x" | "y" | "width" | "height", number>;
-export type UnitIndex = { unit: Unit; indexX: number; indexY: number };
-export type Type = "area" | "item";
+export type ItemIndex = { unit: Unit; indexX: number; indexY: number };
+export enum UnitType {
+  AREA,
+  CLICKABLE,
+}
 
+/**
+ * Basic unit to the stack, which might be an area or an clickable item,
+ * and it stores its node, parent node, children stack and position
+ */
 export class Unit {
   public children?: Stack;
 
   constructor(
     public node: HTMLElement,
     public position: Position,
-    public type: Type,
+    public type: UnitType,
     public parent?: Unit
   ) {
     this.node = node;
@@ -23,30 +30,42 @@ export class Unit {
     this.type = type;
     this.parent = parent;
 
-    if (type === "area") {
+    if (type === UnitType.AREA) {
       this.children = new Stack();
     }
   }
 }
 
+/**
+ * Collection of units and its boundaries values
+ */
 export class Row {
   public units: Unit[] = [];
 
   public head: Record<"x" | "y", number> = { x: Infinity, y: Infinity };
   public tail: Record<"x" | "y", number> = { x: -Infinity, y: -Infinity };
 
-  public findByIndex(index: number): Unit {
+  /**
+   * Returns an unit for a given position
+   */
+  public findByIndex(index: number): Unit | undefined {
     const indexOrLast = Math.min(Math.max(index, 0), this.units.length - 1);
 
     return this.units[indexOrLast];
   }
 
+  /**
+   * It adds a given unit in a new row or in an one that it fits
+   */
   public add(unit: Unit): void {
     if (this.units.length === 0) {
       this.units = [unit];
     } else {
-      const newItems = [...this.units, unit];
-      this.units = newItems.sort((a, b) => {
+      /**
+       * Add to a whatever index and then sort to ensure
+       * that it's visually sorted, take only into account the X axis
+       */
+      this.units = [...this.units, unit].sort((a, b) => {
         const sizeA = a.position.x + a.position.width;
         const sizeB = b.position.x + b.position.width;
 
@@ -66,6 +85,9 @@ export class Row {
     this.calculateBoundaries("y");
   }
 
+  /**
+   * Calculate the rows boundaries, max and min of head and tail
+   */
   private calculateBoundaries(direction: "x" | "y") {
     let lenMin = this.units.length;
     let lenMax = this.units.length;
@@ -90,6 +112,11 @@ export class Row {
   }
 }
 
+/**
+ * Collection of rows
+ * Also provides methods to manage the rows
+ * and a way to navigate through the units row
+ */
 export class Stack {
   private rows: Row[] = [];
   private nodeList: Unit[] = [];
@@ -97,6 +124,10 @@ export class Stack {
   private minHead = Infinity;
   private maxTail = -Infinity;
 
+  /**
+   * Calculate the rows boundaries - max and min of head and tail -
+   * but only take into account the X axis (as the Y axis boundaries is index based)
+   */
   private calculateBoundaries() {
     let lenMin = this.rows.length;
     let lenMax = this.rows.length;
@@ -116,7 +147,84 @@ export class Stack {
     }
   }
 
-  private addToRows(unit: Unit) {
+  /**
+   * ## Add flow ##
+   *
+   * 1. Given a node and its type, create an Unit and then
+   * add it to the node list, which will be iterate later.
+   */
+  public register(
+    node: HTMLElement,
+    type: UnitType,
+    parentUnit?: Unit
+  ): () => void {
+    const position = getPosition(node);
+    const unit = new Unit(node, position, type, parentUnit);
+
+    // Add to the node list
+    this.nodeList.push(unit);
+
+    // Sort items by height
+    this.sortNodeList();
+
+    // Iterate node list and create the rows
+    this.repositionAll();
+
+    /**
+     * Unregister node
+     */
+    return () => {
+      this.nodeList = this.nodeList.filter(
+        (cacheNode) => cacheNode.node !== node
+      );
+      this.sortNodeList();
+      this.repositionAll();
+    };
+  }
+
+  /**
+   * ## Add flow ##
+   *
+   * 1.1 Ensure the highest items come first in the list
+   * This is very important because these items will define
+   * wether to create a new row or to be append to an existing one
+   */
+  private sortNodeList(): void {
+    this.nodeList.sort((a, b) => {
+      if (a.position.height < b.position.height) {
+        return 1;
+      }
+      if (a.position.height > b.position.height) {
+        return -1;
+      }
+
+      return 0;
+    });
+  }
+
+  /**
+   * ## Add flow ##
+   *
+   * 2. Take the node list items and add each Unit to a proper row
+   */
+  private repositionAll(): void {
+    this.rows = [];
+
+    this.nodeList.forEach((unit) => {
+      this.addToRow(unit);
+    });
+
+    this.calculateBoundaries();
+    // this.debug();
+  }
+
+  /**
+   * ## Add flow ##
+   *
+   * 3. Calculate where the given unit belongs to.
+   * It might create a new row or append it to an existing one
+   */
+  private addToRow(unit: Unit) {
     if (this.rows.length === 0) {
       const row = new Row();
       row.add(unit);
@@ -156,61 +264,26 @@ export class Stack {
     });
   }
 
-  private sortNodeList(): void {
-    this.nodeList.sort((a, b) => {
-      if (a.position.height < b.position.height) {
-        return 1;
-      }
-      if (a.position.height > b.position.height) {
-        return -1;
-      }
-
-      return 0;
-    });
-  }
-
-  private repositionAll(): void {
-    this.rows = [];
-
-    this.nodeList.forEach((unit) => {
-      this.addToRows(unit);
-    });
-
-    this.calculateBoundaries();
-    // this.debug();
-  }
-
-  public add(node: HTMLElement, type: Type, parentUnit?: Unit): () => void {
-    const position = getPosition(node);
-    const unit = new Unit(node, position, type, parentUnit);
-
-    this.nodeList.push(unit);
-    this.sortNodeList();
-    this.repositionAll();
-
-    return () => {
-      this.nodeList = this.nodeList.filter(
-        (cacheNode) => cacheNode.node !== node
-      );
-      this.sortNodeList();
-      this.repositionAll();
-    };
-  }
-
-  public findByIndex(x: number, y: number): Unit {
+  /**
+   * Find by index - returns an unit for a given position
+   */
+  public findByIndex(x: number, y: number): Unit | undefined {
     const indexOrLast = Math.min(Math.max(y, 0), this.rows.length - 1);
     const row = this.rows[indexOrLast];
 
     return row?.findByIndex(x);
   }
 
-  public findUnitByNode(
+  /**
+   * Find by node - look for an Unit recursively in the stack in its children stack
+   */
+  public findByNode(
     node?: Element | null,
     rows: Row[] = this.rows
-  ): UnitIndex | undefined {
+  ): ItemIndex | undefined {
     if (!node) return undefined;
 
-    let payload: undefined | UnitIndex;
+    let payload: undefined | ItemIndex;
 
     for (let itemIndexY = 0; itemIndexY < rows.length; itemIndexY++) {
       const row = rows[itemIndexY];
@@ -227,7 +300,7 @@ export class Stack {
 
           break;
         } else if (item.children) {
-          const childrenUnit = this.findUnitByNode(node, item.children.rows);
+          const childrenUnit = this.findByNode(node, item.children.rows);
 
           if (childrenUnit) {
             payload = childrenUnit;
@@ -239,19 +312,28 @@ export class Stack {
     return payload;
   }
 
+  /**
+   * Find column - find the prev or next Unit on the Y axis
+   */
   public findColumn(
-    lookUp: UnitIndex,
+    baseUnit: ItemIndex,
     options: { prev: boolean }
   ): Unit | undefined {
-    // last item
-    if (lookUp.indexY === this.rows.length - 1 && !options.prev) return;
+    // Last item
+    if (baseUnit.indexY === this.rows.length - 1 && !options.prev) return;
 
-    // first item for reverse
-    if (lookUp.indexY === 0 && options.prev) return;
+    // First item for prev navigation
+    if (baseUnit.indexY === 0 && options.prev) return;
 
     let unitCandidate: undefined | Unit;
-    let indexAttempt = lookUp.indexY;
+    let indexAttempt = baseUnit.indexY;
 
+    /**
+     * Walk through all items until it satisfies predicate to find an Unit
+     *
+     * Starts from the current based unit and continue looking for the next item
+     * index by index until overlaps the based-unit and the candidate-unit boundaries
+     */
     while (
       !unitCandidate &&
       (options.prev ? indexAttempt > 0 : indexAttempt < this.rows.length - 1)
@@ -263,18 +345,21 @@ export class Stack {
       }
 
       unitCandidate = this.rows[indexAttempt].units.find((unitItem) =>
-        unitsOverlap(unitItem, lookUp.unit, "x")
+        unitsOverlap(unitItem, baseUnit.unit, "x")
       );
     }
 
     return unitCandidate;
   }
 
+  /**
+   * Find row - find the prev or next Unit on the X axis
+   */
   public findRow(
-    lookUp: UnitIndex,
+    basedUnit: ItemIndex,
     options: { prev: boolean }
   ): Unit | undefined {
-    const unitBoundaries = createBoundaries(lookUp.unit);
+    const unitBoundaries = createBoundaries(basedUnit.unit);
 
     // First
     if (unitBoundaries.x1 === this.minHead && options.prev) return;
@@ -282,9 +367,14 @@ export class Stack {
     // Last
     if (unitBoundaries.x2 === this.maxTail && !options.prev) return;
 
-    // Same row
+    /**
+     * Try first to find a unit in the same row,
+     * which can be the closest item from the based unit
+     */
     const nextItemSameLine =
-      this.rows[lookUp.indexY].units[lookUp.indexX + (options.prev ? -1 : 1)];
+      this.rows[basedUnit.indexY].units[
+        basedUnit.indexX + (options.prev ? -1 : 1)
+      ];
     if (nextItemSameLine) {
       return nextItemSameLine;
     }
@@ -292,16 +382,20 @@ export class Stack {
     let unitCandidate: undefined | Unit;
 
     /**
-     * Visit the closest rows, a previous and a next one, one at time
+     * Visit the closest rows (the previous and a next one, once at time)
      * and then try to find a Unit that satisfy the conditional
      */
-    let prevIndex = lookUp.indexY;
-    let nextIndex = lookUp.indexY;
+    let prevIndex = basedUnit.indexY;
+    let nextIndex = basedUnit.indexY;
 
     while (
       !unitCandidate &&
       (prevIndex > 0 || nextIndex < this.rows.length - 1)
     ) {
+      /**
+       * Given an index, get the row and try to find the
+       * closest Unit in the row from the based-unit boundaries
+       */
       const findInRow = (index: number) => {
         const items = options.prev
           ? [...this.rows[index].units].reverse()
@@ -310,36 +404,43 @@ export class Stack {
         return items.find((unitItem) => {
           const itemBoundaries = createBoundaries(unitItem);
 
+          /**
+           * Only item in the left or in the right,
+           * depending on the direction
+           */
           const constraint = options.prev
             ? itemBoundaries.x2 < unitBoundaries.x1
             : itemBoundaries.x1 > unitBoundaries.x2;
 
-          return (
-            constraint &&
-            unitsOverlap(unitItem, lookUp.unit, "y") &&
-            !unitsOverlap(unitItem, lookUp.unit, "x")
-          );
+          /**
+           * 1. Only higher or lower items
+           * 2. Overlap in the Y axios - as this is a row
+           */
+          return constraint && unitsOverlap(unitItem, basedUnit.unit, "y");
         });
       };
 
-      // Do prev
+      // Visit prev row
       if (prevIndex > 0) {
         prevIndex--;
 
         unitCandidate = findInRow(prevIndex);
       }
 
-      // Do next
+      // Visit next row
       if (nextIndex < this.rows.length - 1) {
         nextIndex++;
 
         const nextCandidate = findInRow(nextIndex);
 
         if (nextCandidate && unitCandidate) {
-          // Compare which one is the closest one
+          /**
+           * As it found Units in the prev and next row
+           * it needs to find which one is the closest unit from based-unit
+           */
           unitCandidate = rowFindCloserUnit(
             [nextCandidate, unitCandidate],
-            lookUp.unit,
+            basedUnit.unit,
             "x"
           );
         } else if (!unitCandidate) {
