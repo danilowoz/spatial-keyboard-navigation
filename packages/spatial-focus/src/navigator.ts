@@ -1,3 +1,4 @@
+import { History } from "./history";
 import { Stack, Unit, ItemIndex, UnitType } from "./stack";
 
 export enum Direction {
@@ -14,7 +15,11 @@ export enum Direction {
  * interface between the navigation events and a Stack
  */
 class Navigator {
-  areaClassName = "area-selected";
+  private areaClassName = "area-selected";
+
+  constructor(private history: History) {
+    this.history = history;
+  }
 
   /**
    * The Element which currently has focus,
@@ -80,8 +85,22 @@ class Navigator {
     direction: Direction,
     from?: HTMLElement
   ): HTMLElement | undefined {
+    /**
+     * Reference nodes
+     */
     const activeUnit = this.getActiveUnit(stack);
     const fromItem = stack.findByNode(from);
+
+    /**
+     * History
+     */
+    let historyItem = this.history.prev();
+    const historyUnit = historyItem && stack.findByNode(historyItem.node);
+    // History is broken, due to some unmonted component
+    if (historyItem && !historyUnit) {
+      this.history.clean();
+      historyItem = undefined;
+    }
 
     /**
      * Third-parties support - the active element doesn't belong to a stack
@@ -129,7 +148,22 @@ class Navigator {
      */
     switch (direction) {
       case Direction.DOWN: {
-        const unit = stackCandidate.findColumn(candidate, { prev: false });
+        let unit: Unit | undefined;
+
+        if (historyItem && historyItem.direction === Direction.UP) {
+          unit = historyUnit!.unit;
+
+          this.history.pop();
+        } else {
+          unit = stackCandidate.findColumn(candidate, { prev: false });
+
+          if (unit) {
+            this.history.add({
+              direction: Direction.DOWN,
+              node: from,
+            });
+          }
+        }
 
         if (unit) {
           this.selectNode(prevUnit, unit);
@@ -140,7 +174,22 @@ class Navigator {
       }
 
       case Direction.UP: {
-        const unit = stackCandidate.findColumn(candidate, { prev: true });
+        let unit: Unit | undefined;
+
+        if (historyItem && historyItem.direction === Direction.DOWN) {
+          unit = historyUnit!.unit;
+
+          this.history.pop();
+        } else {
+          unit = stackCandidate.findColumn(candidate, { prev: true });
+
+          if (unit) {
+            this.history.add({
+              direction: Direction.UP,
+              node: from,
+            });
+          }
+        }
 
         if (unit) {
           this.selectNode(prevUnit, unit);
@@ -151,7 +200,21 @@ class Navigator {
       }
 
       case Direction.RIGHT: {
-        const unit = stackCandidate.findRow(candidate, { prev: false });
+        let unit: Unit | undefined;
+
+        if (historyItem && historyItem.direction === Direction.LEFT) {
+          unit = historyUnit!.unit;
+          this.history.pop();
+        } else {
+          unit = stackCandidate.findRow(candidate, { prev: false });
+
+          if (unit) {
+            this.history.add({
+              direction: Direction.RIGHT,
+              node: from,
+            });
+          }
+        }
 
         if (unit) {
           this.selectNode(prevUnit, unit);
@@ -162,7 +225,22 @@ class Navigator {
       }
 
       case Direction.LEFT: {
-        const unit = stackCandidate.findRow(candidate, { prev: true });
+        let unit: Unit | undefined;
+
+        if (historyItem && historyItem.direction === Direction.RIGHT) {
+          unit = historyUnit!.unit;
+
+          this.history.pop();
+        } else {
+          unit = stackCandidate.findRow(candidate, { prev: true });
+
+          if (unit) {
+            this.history.add({
+              direction: Direction.LEFT,
+              node: from,
+            });
+          }
+        }
 
         if (unit) {
           this.selectNode(prevUnit, unit);
@@ -177,6 +255,8 @@ class Navigator {
         const childrenUnit = childrenStack?.unit.children?.findByIndex(0, 0);
 
         if (childrenStack && childrenUnit) {
+          this.history.clean();
+
           this.selectNode(prevUnit, childrenUnit);
           selectedNode = childrenUnit.node;
         }
@@ -186,6 +266,8 @@ class Navigator {
 
       case Direction.LEAVE_AREA: {
         if (candidate.unit.parent) {
+          this.history.clean();
+
           this.selectNode(prevUnit, candidate.unit.parent);
           selectedNode = candidate.unit.parent.node;
         }
@@ -193,6 +275,8 @@ class Navigator {
         break;
       }
     }
+
+    this.history.log();
 
     return selectedNode;
   }

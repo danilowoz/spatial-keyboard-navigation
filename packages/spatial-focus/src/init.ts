@@ -1,11 +1,16 @@
 import { Stack } from "./stack";
 import { Direction, Navigator } from "./navigator";
+import { History } from "./history";
 
-let areasInstance: null | Stack;
+/**
+ * History instance
+ */
+const history = new History();
 
 /**
  * Create a new Stack or retrieve an exiting one
  */
+let areasInstance: null | Stack;
 export function initAreas(): Stack {
   if (areasInstance) {
     return areasInstance;
@@ -26,10 +31,11 @@ let lastItemVisited: HTMLElement | undefined;
  * Set the keydown event and create a new Navigator,
  * which will interact with the Stack
  */
+
 export function initEventListener(): () => void {
   function keydownListener({ key }: { key: string }) {
     const areas = initAreas();
-    const nav = new Navigator();
+    const nav = new Navigator(history);
 
     switch (key) {
       case "Escape":
