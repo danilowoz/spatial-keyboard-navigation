@@ -215,7 +215,6 @@ export class Stack {
     });
 
     this.calculateBoundaries();
-    // this.debug();
   }
 
   /**
@@ -450,43 +449,5 @@ export class Stack {
     }
 
     return unitCandidate;
-  }
-
-  public debug(): void {
-    console.log(this.rows);
-    const prevContainer = document.querySelector(".container-debug");
-
-    if (prevContainer) {
-      prevContainer.remove();
-    }
-
-    const body = document.querySelector("body");
-    const container = document.createElement("div");
-
-    container.className = "container-debug";
-    container.style.position = "absolute";
-    container.style.top = `0px`;
-    container.style.left = `0px`;
-    container.style.right = `0px`;
-    container.style.bottom = `0px`;
-
-    for (let index = 0; index < this.rows.length; index++) {
-      const row = this.rows[index];
-
-      const placeholder = document.createElement("div");
-      placeholder.style.position = "absolute";
-      placeholder.style.width = `${row.tail.x - row.head.x}px`;
-      placeholder.style.height = `${row.tail.y - row.head.y}px`;
-      placeholder.style.top = `${row.head.y}px`;
-      placeholder.style.left = `${row.head.x}px`;
-
-      placeholder.style.backgroundColor = `rgba(255,200,0,.1)`;
-      placeholder.style.border = `1px solid rgba(255,200,0,.1)`;
-      placeholder.textContent = `${index}`;
-
-      container?.append(placeholder);
-    }
-
-    body?.append(container);
   }
 }

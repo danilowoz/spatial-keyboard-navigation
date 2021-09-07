@@ -11,6 +11,7 @@ class History {
 
   public add(step: Step): void {
     this.steps.push(step);
+
     this.steps = this.steps.slice(
       Math.max(this.steps.length - this.limit, 0),
       this.steps.length

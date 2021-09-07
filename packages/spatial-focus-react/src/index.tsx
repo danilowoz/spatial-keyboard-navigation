@@ -1,4 +1,4 @@
-import { initAreas, initEventListener, UnitType } from "spatial-focus";
+import { initStack, initEventListener, UnitType } from "spatial-focus";
 
 import React, {
   FC,
@@ -59,7 +59,7 @@ const Anchor: FC = ({ children }) => {
   useEffect(() => {
     if (!ref) return;
 
-    const stack = initAreas();
+    const stack = initStack();
 
     /**
      * If there is Area in the parent, but this is the

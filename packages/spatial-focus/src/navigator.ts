@@ -150,6 +150,7 @@ class Navigator {
       case Direction.DOWN: {
         let unit: Unit | undefined;
 
+        // Revert action and remove from history
         if (historyItem && historyItem.direction === Direction.UP) {
           unit = historyUnit!.unit;
 
@@ -176,6 +177,7 @@ class Navigator {
       case Direction.UP: {
         let unit: Unit | undefined;
 
+        // Revert action and remove from history
         if (historyItem && historyItem.direction === Direction.DOWN) {
           unit = historyUnit!.unit;
 
@@ -202,6 +204,7 @@ class Navigator {
       case Direction.RIGHT: {
         let unit: Unit | undefined;
 
+        // Revert action and remove from history
         if (historyItem && historyItem.direction === Direction.LEFT) {
           unit = historyUnit!.unit;
           this.history.pop();
@@ -227,6 +230,7 @@ class Navigator {
       case Direction.LEFT: {
         let unit: Unit | undefined;
 
+        // Revert action and remove from history
         if (historyItem && historyItem.direction === Direction.RIGHT) {
           unit = historyUnit!.unit;
 
@@ -275,8 +279,6 @@ class Navigator {
         break;
       }
     }
-
-    this.history.log();
 
     return selectedNode;
   }

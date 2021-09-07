@@ -10,15 +10,15 @@ const history = new History();
 /**
  * Create a new Stack or retrieve an exiting one
  */
-let areasInstance: null | Stack;
-export function initAreas(): Stack {
-  if (areasInstance) {
-    return areasInstance;
+let stackInstance: null | Stack;
+export function initStack(): Stack {
+  if (stackInstance) {
+    return stackInstance;
   }
 
-  areasInstance = new Stack();
+  stackInstance = new Stack();
 
-  return areasInstance;
+  return stackInstance;
 }
 
 /**
@@ -31,16 +31,15 @@ let lastItemVisited: HTMLElement | undefined;
  * Set the keydown event and create a new Navigator,
  * which will interact with the Stack
  */
-
 export function initEventListener(): () => void {
   function keydownListener({ key }: { key: string }) {
-    const areas = initAreas();
+    const stack = initStack();
     const nav = new Navigator(history);
 
     switch (key) {
       case "Escape":
         lastItemVisited = nav.navigate(
-          areas,
+          stack,
           Direction.LEAVE_AREA,
           lastItemVisited
         );
@@ -49,26 +48,26 @@ export function initEventListener(): () => void {
       case "Enter":
       case " ": // Space
         lastItemVisited = nav.navigate(
-          areas,
+          stack,
           Direction.ENTER_AREA,
           lastItemVisited
         );
 
         break;
       case "ArrowUp":
-        lastItemVisited = nav.navigate(areas, Direction.UP, lastItemVisited);
+        lastItemVisited = nav.navigate(stack, Direction.UP, lastItemVisited);
 
         break;
       case "ArrowRight":
-        lastItemVisited = nav.navigate(areas, Direction.RIGHT, lastItemVisited);
+        lastItemVisited = nav.navigate(stack, Direction.RIGHT, lastItemVisited);
 
         break;
       case "ArrowDown":
-        lastItemVisited = nav.navigate(areas, Direction.DOWN, lastItemVisited);
+        lastItemVisited = nav.navigate(stack, Direction.DOWN, lastItemVisited);
 
         break;
       case "ArrowLeft":
-        lastItemVisited = nav.navigate(areas, Direction.LEFT, lastItemVisited);
+        lastItemVisited = nav.navigate(stack, Direction.LEFT, lastItemVisited);
 
         break;
     }
