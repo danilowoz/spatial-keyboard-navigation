@@ -115,13 +115,11 @@ class Navigator {
       /**
        * Prevent Esc and Enter select an item
        */
-      const validDirection = [
-        Direction.UP,
-        Direction.RIGHT,
-        Direction.DOWN,
-        Direction.LEFT,
+      const inValidDirection = [
+        Direction.ENTER_AREA,
+        Direction.LEAVE_AREA,
       ].includes(direction);
-      if (!validDirection) return;
+      if (inValidDirection) return;
 
       const unit = stack?.findByIndex(0, 0);
 
@@ -150,7 +148,7 @@ class Navigator {
       case Direction.DOWN: {
         let unit: Unit | undefined;
 
-        // Revert action and remove from history
+        // From history - revert action and remove from history
         if (historyItem && historyItem.direction === Direction.UP) {
           unit = historyUnit!.unit;
 
@@ -177,7 +175,7 @@ class Navigator {
       case Direction.UP: {
         let unit: Unit | undefined;
 
-        // Revert action and remove from history
+        // From history - revert action and remove from history
         if (historyItem && historyItem.direction === Direction.DOWN) {
           unit = historyUnit!.unit;
 
@@ -204,7 +202,7 @@ class Navigator {
       case Direction.RIGHT: {
         let unit: Unit | undefined;
 
-        // Revert action and remove from history
+        // From history - revert action and remove from history
         if (historyItem && historyItem.direction === Direction.LEFT) {
           unit = historyUnit!.unit;
           this.history.pop();
@@ -230,7 +228,7 @@ class Navigator {
       case Direction.LEFT: {
         let unit: Unit | undefined;
 
-        // Revert action and remove from history
+        // From history - revert action and remove from history
         if (historyItem && historyItem.direction === Direction.RIGHT) {
           unit = historyUnit!.unit;
 

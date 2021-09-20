@@ -173,13 +173,15 @@ export class Stack {
     /**
      * Unregister node
      */
-    return () => {
-      this.nodeList = this.nodeList.filter(
-        (cacheNode) => cacheNode.node !== node
-      );
-      this.sortNodeList();
-      this.repositionAll();
-    };
+    return () => this.unregister(node);
+  }
+
+  public unregister(node: HTMLElement): void {
+    this.nodeList = this.nodeList.filter(
+      (cacheNode) => cacheNode.node !== node
+    );
+    this.sortNodeList();
+    this.repositionAll();
   }
 
   /**

@@ -8,7 +8,8 @@ import Options from "../components/Options";
 import { useState } from "react";
 
 const App: React.FC = () => {
-  const [currentItem, setCurrentItem] = useState(8);
+  const [currentItem, setCurrentItem] = useState(0);
+  const [area, setArea] = useState(false);
 
   return (
     <Provider>
@@ -20,10 +21,10 @@ const App: React.FC = () => {
         className="grid grid-cols-4 h-screen"
         style={{ gridTemplateRows: "5em 1fr" }}
       >
-        <Header area />
-        <Sidebar area onClick={setCurrentItem} />
-        <Main area currentItem={currentItem} />
-        <Options area />
+        <Header area={area} />
+        <Sidebar setArea={setArea} area={area} onClick={setCurrentItem} />
+        <Main area={area} currentItem={currentItem} />
+        <Options area={area} />
       </div>
     </Provider>
   );

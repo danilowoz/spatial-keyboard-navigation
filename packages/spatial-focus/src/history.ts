@@ -18,10 +18,6 @@ class History {
     );
   }
 
-  public log(): void {
-    console.log(this.steps);
-  }
-
   public prev(): Step | undefined {
     return this.steps[this.steps.length - 1];
   }

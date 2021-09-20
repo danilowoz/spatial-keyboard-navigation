@@ -20,12 +20,23 @@ const AreaProvider = createContext<{ parent?: HTMLElement }>({
   parent: undefined,
 });
 
-const useAreaContext = () => useContext(AreaProvider);
-
 const Area: FC = ({ children }) => {
   const [ref, setParent] = useState<HTMLElement>();
 
   Children.only(children);
+
+  useEffect(
+    function registerArea() {
+      if (!ref) return;
+
+      return function unregisterArea() {
+        const stack = initStack();
+
+        stack.unregister(ref);
+      };
+    },
+    [ref]
+  );
 
   return (
     <AreaProvider.Provider value={{ parent: ref }}>
@@ -52,38 +63,42 @@ const Area: FC = ({ children }) => {
 const Anchor: FC = ({ children }) => {
   type MaybeButton = HTMLElement & { disabled: boolean };
   const ref = useRef<MaybeButton>();
-  const { parent } = useAreaContext();
+  const { parent } = useContext(AreaProvider);
 
   Children.only(children);
 
-  useEffect(() => {
-    if (!ref) return;
+  useEffect(
+    function registerItem() {
+      if (!ref) return;
 
-    const stack = initStack();
+      const stack = initStack();
 
-    /**
-     * If there is Area in the parent, but this is the
-     * first time to interact with, register the area first
-     */
-    if (parent && !stack.findByNode(parent)) {
-      stack.register(parent, UnitType.AREA);
-    }
-
-    if (ref.current && !ref.current.disabled) {
       /**
-       * Register the clickable in the area
+       * If there is Area in the parent, but this is the
+       * first time to interact with, register the area first
+       *
+       * !Important: the unregister must be in the area component
        */
-      if (parent) {
-        const { unit: parentUnit } = stack.findByNode(parent)!;
+      if (parent && !stack.findByNode(parent)) {
+        stack.register(parent, UnitType.AREA);
+      }
 
-        const removeItem = parentUnit.children?.register(
-          ref.current,
-          UnitType.CLICKABLE,
-          parentUnit
-        );
+      if (ref.current && !ref.current.disabled) {
+        /**
+         * Register the clickable in the area
+         */
+        if (parent) {
+          const { unit: parentUnit } = stack.findByNode(parent)!;
 
-        return removeItem;
-      } else {
+          const removeItem = parentUnit.children?.register(
+            ref.current,
+            UnitType.CLICKABLE,
+            parentUnit
+          );
+
+          return removeItem;
+        }
+
         /**
          * Register the clickable without any area
          */
@@ -91,10 +106,11 @@ const Anchor: FC = ({ children }) => {
 
         return removeItem;
       }
-    }
 
-    return;
-  }, [parent]);
+      return;
+    },
+    [parent]
+  );
 
   return Children.map(children, (child) => {
     if (isValidElement(child)) {
@@ -110,7 +126,7 @@ const Anchor: FC = ({ children }) => {
  */
 // @ts-ignore
 const Provider: React.FC = ({ children }) => {
-  useEffect(() => {
+  useEffect(function initEventListenerEffect() {
     const remove = initEventListener();
 
     return remove;
