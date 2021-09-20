@@ -130,7 +130,7 @@ class Navigator {
       return;
     }
 
-    const candidate = fromItem! ?? activeUnit!;
+    const candidate = activeUnit! ?? fromItem!;
     const { unit: prevUnit } = candidate;
 
     /**

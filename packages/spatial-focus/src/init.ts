@@ -37,6 +37,14 @@ export function initEventListener(): () => void {
     const nav = new Navigator(history);
 
     switch (key) {
+      case "Tab":
+        /**
+         * TODO: Maybe in the future it makes sense support tab
+         * but for now it turns the history not reliable
+         */
+        history.clean();
+
+        break;
       case "Escape":
         lastItemVisited = nav.navigate(
           stack,
