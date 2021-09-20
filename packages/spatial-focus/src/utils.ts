@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Position, Row, Unit } from "./stack";
 
 type Size = Record<"x1" | "x2" | "y1" | "y2", number>;
@@ -105,4 +106,51 @@ function rowFindCloserUnit(
   return unitCandidate;
 }
 
-export { unitsOverlap, createBoundaries, getPosition, rowFindCloserUnit };
+/**
+ * Events
+ */
+interface EventsMap {
+  [event: string]: any;
+}
+
+interface DefaultEvents extends EventsMap {
+  [event: string]: (...args: any) => void;
+}
+
+interface Unsubscribe {
+  (): void;
+}
+
+export interface Emitter<Events extends EventsMap = DefaultEvents> {
+  events: Partial<{ [E in keyof Events]: Events[E] }>;
+  on<K extends keyof Events>(this: this, event: K, cb: Events[K]): Unsubscribe;
+  emit<K extends keyof Events>(
+    this: this,
+    event: K,
+    ...args: Parameters<Events[K]>
+  ): void;
+}
+
+const events = <
+  Events extends EventsMap = DefaultEvents
+>(): Emitter<Events> => ({
+  events: {},
+  emit(event, ...args) {
+    (this.events[event] ?? ([] as any)).forEach((i: any) => i(...args));
+  },
+  on(event, cb) {
+    (this.events[event] = this.events[event] ?? ([] as any)).push(cb);
+    return () =>
+      (this.events[event] = (this.events[event] ?? ([] as any)).filter(
+        (i: any) => i !== cb
+      ));
+  },
+});
+
+export {
+  unitsOverlap,
+  createBoundaries,
+  getPosition,
+  rowFindCloserUnit,
+  events,
+};

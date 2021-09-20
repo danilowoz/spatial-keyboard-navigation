@@ -1,4 +1,9 @@
-import { initStack, initEventListener, UnitType } from "spatial-focus";
+import {
+  initStack,
+  initEventListener,
+  UnitType,
+  eventEmitter,
+} from "spatial-focus";
 
 import React, {
   FC,
@@ -124,6 +129,27 @@ const Anchor: FC = ({ children }) => {
 /**
  * Provider - manage the listeners
  */
+type NavigationContext = {
+  node?: HTMLElement;
+};
+
+const useNavigationContext = (): NavigationContext => {
+  const [navigationContext, setNavigationContext] = useState<NavigationContext>(
+    {}
+  );
+
+  useEffect(function listerEvents() {
+    const handler = (payload: { node: HTMLElement }) => {
+      setNavigationContext({ node: payload.node });
+    };
+    const unregister = eventEmitter.on("navigate", handler);
+
+    return unregister;
+  });
+
+  return navigationContext;
+};
+
 // @ts-ignore
 const Provider: React.FC = ({ children }) => {
   useEffect(function initEventListenerEffect() {
@@ -135,4 +161,4 @@ const Provider: React.FC = ({ children }) => {
   return children;
 };
 
-export { Anchor, Area, Provider };
+export { Anchor, Area, Provider, useNavigationContext };

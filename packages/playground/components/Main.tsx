@@ -18,7 +18,7 @@ const Main: React.FC<{ currentItem: number; area?: boolean }> = ({
         <div>
           {LIST[currentItem].todo.map((e) => (
             <Anchor key={e.text}>
-              <button className="py-4 border-b border-solid border-gray-100 flex items-center w-full">
+              <button className="py-4 border-b border-solid border-gray-100 flex items-center w-full text-left">
                 <div
                   className={`w-5 h-5 rounded-full mr-2 ${
                     e.mark

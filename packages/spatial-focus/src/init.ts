@@ -1,6 +1,10 @@
 import { Stack } from "./stack";
 import { Direction, Navigator } from "./navigator";
 import { History } from "./history";
+import { events } from "./utils";
+
+const eventEmitter =
+  events<{ navigate: (payload: { node: HTMLElement }) => void }>();
 
 /**
  * History instance
@@ -11,7 +15,7 @@ const history = new History();
  * Create a new Stack or retrieve an exiting one
  */
 let stackInstance: null | Stack;
-export function initStack(): Stack {
+function initStack(): Stack {
   if (stackInstance) {
     return stackInstance;
   }
@@ -27,11 +31,13 @@ export function initStack(): Stack {
  */
 let lastItemVisited: HTMLElement | undefined;
 
+console.log(lastItemVisited);
+
 /**
  * Set the keydown event and create a new Navigator,
  * which will interact with the Stack
  */
-export function initEventListener(): () => void {
+function initEventListener(): () => void {
   function keydownListener({ key }: { key: string }) {
     const stack = initStack();
     const nav = new Navigator(history);
@@ -79,6 +85,10 @@ export function initEventListener(): () => void {
 
         break;
     }
+
+    if (lastItemVisited) {
+      eventEmitter.emit("navigate", { node: lastItemVisited });
+    }
   }
 
   window.addEventListener("keydown", keydownListener);
@@ -88,3 +98,5 @@ export function initEventListener(): () => void {
     window.removeEventListener("keydown", keydownListener);
   };
 }
+
+export { eventEmitter, initStack, initEventListener };

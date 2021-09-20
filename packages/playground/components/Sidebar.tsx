@@ -4,10 +4,10 @@ import { Fragment } from "react";
 
 const Sidebar: React.FC<{
   onClick: (number: number) => void;
-  area?: boolean;
-  setArea: (boolean: boolean) => void;
-}> = ({ onClick, area, setArea }) => {
-  const MaybeArea = area ? Area : Fragment;
+  config?: Record<"area" | "animated", boolean>;
+  setConfig: any;
+}> = ({ onClick, config, setConfig }) => {
+  const MaybeArea = config.area ? Area : Fragment;
 
   return (
     <MaybeArea>
@@ -69,11 +69,30 @@ const Sidebar: React.FC<{
             <input
               type="checkbox"
               className="mr-1"
-              checked={area}
-              onChange={(event) => setArea(event.target.checked)}
+              checked={config.area}
+              onChange={(event) =>
+                setConfig((prev) => ({ ...prev, area: event.target.checked }))
+              }
             />
           </Anchor>
           Areas
+        </label>
+
+        <label className="text-gray-500 block">
+          <Anchor>
+            <input
+              type="checkbox"
+              className="mr-1"
+              checked={config.animated}
+              onChange={(event) =>
+                setConfig((prev) => ({
+                  ...prev,
+                  animated: event.target.checked,
+                }))
+              }
+            />
+          </Anchor>
+          Animated
         </label>
       </div>
     </MaybeArea>
