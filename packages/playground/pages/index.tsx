@@ -20,21 +20,26 @@ const App: React.FC = () => {
       let timer: any;
       const position = node?.getBoundingClientRect();
 
+      const borderRadius = window.getComputedStyle(node).borderRadius;
+
       void controls
         .start({
           y: position.top,
           x: position.left,
           width: position.width,
           height: position.height,
-          borderRadius: window.getComputedStyle(node).borderRadius,
-          backgroundColor: "rgba(123, 97, 255, .1)",
+          borderRadius: borderRadius === "0px" ? "4px" : borderRadius,
+          backgroundColor: "rgba(123, 97, 255, .05)",
+          borderColor: "rgba(123, 97, 255, 1)",
         })
         .then(() => {
           timer = setTimeout(() => {
             void controls.start({
               backgroundColor: "rgba(123, 97, 255, 0)",
+              borderColor: "rgba(123, 97, 255, 0.5)",
+              transition: { duration: 1 },
             });
-          }, 1500);
+          }, 1000);
         });
 
       return () => {
@@ -59,6 +64,7 @@ const App: React.FC = () => {
             className="fixed"
             animate={controls}
             style={{
+              border: "1px solid",
               pointerEvents: "none",
             }}
           />

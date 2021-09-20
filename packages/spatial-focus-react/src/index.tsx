@@ -1,9 +1,5 @@
-import {
-  initStack,
-  initEventListener,
-  UnitType,
-  eventEmitter,
-} from "spatial-focus";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { initStack, initEventListener, UnitType } from "spatial-focus";
 
 import React, {
   FC,
@@ -139,12 +135,15 @@ const useNavigationContext = (): NavigationContext => {
   );
 
   useEffect(function listerEvents() {
-    const handler = (payload: { node: HTMLElement }) => {
-      setNavigationContext({ node: payload.node });
+    const handler = (payload: CustomEvent<{ node: HTMLElement }>) => {
+      setNavigationContext({ node: payload.detail.node });
     };
-    const unregister = eventEmitter.on("navigate", handler);
 
-    return unregister;
+    window.addEventListener("spatial-focus-navigate", handler as any);
+
+    return () => {
+      window.removeEventListener("spatial-focus-navigate", handler as any);
+    };
   });
 
   return navigationContext;
@@ -156,7 +155,7 @@ const Provider: React.FC = ({ children }) => {
     const remove = initEventListener();
 
     return remove;
-  });
+  }, []);
 
   return children;
 };

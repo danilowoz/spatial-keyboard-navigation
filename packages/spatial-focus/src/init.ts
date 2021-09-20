@@ -1,10 +1,6 @@
 import { Stack } from "./stack";
 import { Direction, Navigator } from "./navigator";
 import { History } from "./history";
-import { events } from "./utils";
-
-const eventEmitter =
-  events<{ navigate: (payload: { node: HTMLElement }) => void }>();
 
 /**
  * History instance
@@ -30,8 +26,6 @@ function initStack(): Stack {
  * there is no focused item in the document
  */
 let lastItemVisited: HTMLElement | undefined;
-
-console.log(lastItemVisited);
 
 /**
  * Set the keydown event and create a new Navigator,
@@ -87,7 +81,11 @@ function initEventListener(): () => void {
     }
 
     if (lastItemVisited) {
-      eventEmitter.emit("navigate", { node: lastItemVisited });
+      window.dispatchEvent(
+        new CustomEvent("spatial-focus-navigate", {
+          detail: { node: lastItemVisited },
+        })
+      );
     }
   }
 
@@ -99,4 +97,4 @@ function initEventListener(): () => void {
   };
 }
 
-export { eventEmitter, initStack, initEventListener };
+export { initStack, initEventListener };

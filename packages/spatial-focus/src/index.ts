@@ -1,2 +1,2 @@
 export { UnitType } from "./stack";
-export { initStack, initEventListener, eventEmitter } from "./init";
+export { initStack, initEventListener } from "./init";

@@ -14,7 +14,7 @@ const Header: React.FC<{ area?: boolean }> = ({ area }) => {
         </Anchor>
 
         <Anchor>
-          <button className="bg-gray-50 text-gray-500 flex rounded-full w-10 h-10 text-2xl">
+          <button className="bg-gray-50 text-gray-500 flex rounded-full w-10 h-10 text-2xl mr-24">
             <span className="m-auto">+</span>
           </button>
         </Anchor>
