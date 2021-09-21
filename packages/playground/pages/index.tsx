@@ -31,6 +31,7 @@ const App: React.FC = () => {
           borderRadius: borderRadius === "0px" ? "4px" : borderRadius,
           backgroundColor: "rgba(123, 97, 255, .05)",
           borderColor: "rgba(123, 97, 255, 1)",
+          transition: { type: "spring", damping: 17 },
         })
         .then(() => {
           timer = setTimeout(() => {
