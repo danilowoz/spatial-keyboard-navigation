@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 
 const App: React.FC = () => {
   const [currentItem, setCurrentItem] = useState(0);
-  const [config, setConfig] = useState({ area: false, animated: false });
+  const [config, setConfig] = useState({ area: false, animated: false, strictArea: false });
   const controls = useAnimation();
 
   const { node } = useNavigationContext();
@@ -50,7 +50,7 @@ const App: React.FC = () => {
   }, [node]);
 
   return (
-    <Provider areaClassName="area-selected">
+    <Provider areaClassName="area-selected" strictArea={config.strictArea}>
       <style>{`.area-selected,[data-focus-visible-added] {
     outline: 2px solid #7B61FF;
     ${config.animated ? "outline: none;" : ""}

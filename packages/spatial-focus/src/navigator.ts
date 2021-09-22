@@ -11,7 +11,8 @@ export enum Direction {
 }
 
 export interface Options {
-  areaClassName?: string
+  areaClassName?: string,
+  strictArea?: boolean
 }
 
 /**
@@ -20,12 +21,17 @@ export interface Options {
  */
 class Navigator {
   private areaClassName = "area-selected";
+  private strictArea = true
 
   constructor(private history: History, options: Options) {
     this.history = history;
     
     if (options.areaClassName) {
       this.areaClassName = options.areaClassName
+    }
+    
+    if(options.strictArea !== undefined) {
+      this.strictArea = options.strictArea
     }
   }
 
@@ -144,8 +150,8 @@ class Navigator {
     /**
      * Might be a children stack (clickable) or areas
      */
-    const stackCandidate =
-      stack.findByNode(candidate.unit.parent?.node)?.unit.children ?? stack;
+    const parentStack = stack.findByNode(candidate.unit.parent?.node)
+    const stackCandidate = parentStack?.unit.children ?? stack;
 
     let selectedNode: HTMLElement | undefined;
 
@@ -169,6 +175,10 @@ class Navigator {
               direction: Direction.DOWN,
               node: from,
             });
+          } else if (!this.strictArea && parentStack) {
+            // Go beyond the boundaries of its own area 
+            unit = stack.findColumn(parentStack, { prev: false });
+            this.history.clean()
           }
         }
 
@@ -196,6 +206,10 @@ class Navigator {
               direction: Direction.UP,
               node: from,
             });
+          } else if (!this.strictArea && parentStack) {
+            // Go beyond the boundaries of its own area 
+            unit = stack.findColumn(parentStack, { prev: true });
+            this.history.clean()
           }
         }
 
@@ -222,6 +236,10 @@ class Navigator {
               direction: Direction.RIGHT,
               node: from,
             });
+          } else if (!this.strictArea && parentStack) {
+            // Go beyond the boundaries of its own area 
+            unit = stack.findRow(parentStack, { prev: false });
+            this.history.clean()
           }
         }
 
@@ -249,6 +267,10 @@ class Navigator {
               direction: Direction.LEFT,
               node: from,
             });
+          } else if (!this.strictArea && parentStack) {
+            // Go beyond the boundaries of its own area 
+            unit = stack.findRow(parentStack, { prev: true });
+            this.history.clean()
           }
         }
 

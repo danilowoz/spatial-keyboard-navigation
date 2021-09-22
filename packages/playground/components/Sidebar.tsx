@@ -4,7 +4,7 @@ import { Fragment } from "react";
 
 const Sidebar: React.FC<{
   onClick: (number: number) => void;
-  config?: Record<"area" | "animated", boolean>;
+  config?: Record<"area" | "animated" | "strictArea", boolean>;
   setConfig: any;
 }> = ({ onClick, config, setConfig }) => {
   const MaybeArea = config.area ? Area : Fragment;
@@ -64,35 +64,48 @@ const Sidebar: React.FC<{
         <p className="text-xs font-medium uppercase mb-2 text-gray-400 mt-10">
           Options
         </p>
-        <label className="text-gray-500">
-          <Anchor>
-            <input
-              type="checkbox"
-              className="mr-1"
-              checked={config.area}
-              onChange={(event) =>
-                setConfig((prev) => ({ ...prev, area: event.target.checked }))
-              }
-            />
-          </Anchor>
-          Areas
-        </label>
 
         <label className="text-gray-500 block">
-          <Anchor>
-            <input
-              type="checkbox"
-              className="mr-1"
-              checked={config.animated}
-              onChange={(event) =>
-                setConfig((prev) => ({
-                  ...prev,
-                  animated: event.target.checked,
-                }))
-              }
-            />
-          </Anchor>
+          <input
+            type="checkbox"
+            className="mr-1"
+            checked={config.animated}
+            onChange={(event) =>
+              setConfig((prev) => ({
+                ...prev,
+                animated: event.target.checked,
+              }))
+            }
+          />
           Animated
+        </label>
+        
+        <label className="text-gray-500">
+          <input
+            type="checkbox"
+            className="mr-1"
+            checked={config.area}
+            onChange={(event) =>
+              setConfig((prev) => ({ ...prev, area: event.target.checked }))
+            }
+          />
+          Areas
+        </label>
+        
+        <label className="text-gray-500 block">
+          <input
+            type="checkbox"
+            className="mr-1"
+            checked={config.strictArea}
+            onChange={(event) =>
+              setConfig((prev) => ({
+                ...prev,
+                strictArea: event.target.checked,
+                area: event.target.checked ? true : prev.area,
+              }))
+            }
+          />
+          Strict area
         </label>
       </div>
     </MaybeArea>

@@ -150,12 +150,12 @@ const useNavigationContext = (): NavigationContext => {
 };
 
 // @ts-ignore
-const Provider: React.FC<NavigatorOptions> = ({ children, areaClassName }) => {
+const Provider: React.FC<NavigatorOptions> = ({ children, areaClassName, strictArea }) => {
   useEffect(function initEventListenerEffect() {
-    const remove = initEventListener({ areaClassName });
+    const remove = initEventListener({ areaClassName, strictArea });
 
     return remove;
-  }, [areaClassName]);
+  }, [areaClassName, strictArea]);
 
   return children;
 };
