@@ -10,6 +10,10 @@ export enum Direction {
   LEAVE_AREA,
 }
 
+export interface Options {
+  areaClassName?: string
+}
+
 /**
  * Stateless of group of methods that works as an
  * interface between the navigation events and a Stack
@@ -17,8 +21,12 @@ export enum Direction {
 class Navigator {
   private areaClassName = "area-selected";
 
-  constructor(private history: History) {
+  constructor(private history: History, options: Options) {
     this.history = history;
+    
+    if (options.areaClassName) {
+      this.areaClassName = options.areaClassName
+    }
   }
 
   /**

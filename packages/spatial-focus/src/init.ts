@@ -1,5 +1,5 @@
 import { Stack } from "./stack";
-import { Direction, Navigator } from "./navigator";
+import { Direction, Navigator, Options } from "./navigator";
 import { History } from "./history";
 
 /**
@@ -31,10 +31,11 @@ let lastItemVisited: HTMLElement | undefined;
  * Set the keydown event and create a new Navigator,
  * which will interact with the Stack
  */
-function initEventListener(): () => void {
+export interface NavigatorOptions extends Options {} 
+function initEventListener(options: Options): () => void {
   function keydownListener({ key }: { key: string }) {
     const stack = initStack();
-    const nav = new Navigator(history);
+    const nav = new Navigator(history, options);
 
     switch (key) {
       case "Tab":

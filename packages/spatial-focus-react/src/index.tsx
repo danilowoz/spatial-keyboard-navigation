@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { initStack, initEventListener, UnitType } from "spatial-focus";
+import { initStack, initEventListener, UnitType, NavigatorOptions } from "spatial-focus";
 
 import React, {
   FC,
@@ -150,12 +150,12 @@ const useNavigationContext = (): NavigationContext => {
 };
 
 // @ts-ignore
-const Provider: React.FC = ({ children }) => {
+const Provider: React.FC<NavigatorOptions> = ({ children, areaClassName }) => {
   useEffect(function initEventListenerEffect() {
-    const remove = initEventListener();
+    const remove = initEventListener({ areaClassName });
 
     return remove;
-  }, []);
+  }, [areaClassName]);
 
   return children;
 };

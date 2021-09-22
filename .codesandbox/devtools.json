@@ -2,7 +2,17 @@
     "previews": {
         "3000": {
             "name": "Playground",
-            "script": "yarn dev" 
+            "command": "yarn dev" 
         }
+    },
+    "tasks": {
+        "setup": {
+            "name": "Install Dependencies",
+            "command": "yarn"
+        },
+        "dev": {
+            "name": "Development",
+            "command": "yarn dev"
+        }    
     }
 }

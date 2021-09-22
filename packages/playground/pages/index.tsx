@@ -50,7 +50,7 @@ const App: React.FC = () => {
   }, [node]);
 
   return (
-    <Provider>
+    <Provider areaClassName="area-selected">
       <style>{`.area-selected,[data-focus-visible-added] {
     outline: 2px solid #7B61FF;
     ${config.animated ? "outline: none;" : ""}
