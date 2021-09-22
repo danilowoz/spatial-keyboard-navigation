@@ -31,16 +31,16 @@ const App: React.FC = () => {
           borderRadius: borderRadius === "0px" ? "4px" : borderRadius,
           backgroundColor: "rgba(123, 97, 255, .05)",
           borderColor: "rgba(123, 97, 255, 1)",
-          transition: { type: "spring", damping: 17 },
+          transition: { type: "spring", duration: 0.4, delay: 0.1 },
         })
         .then(() => {
           timer = setTimeout(() => {
             void controls.start({
               backgroundColor: "rgba(123, 97, 255, 0)",
               borderColor: "rgba(123, 97, 255, 0.5)",
-              transition: { duration: 1 },
+              transition: { duration: 0.3 },
             });
-          }, 1000);
+          }, 500);
         });
 
       return () => {
@@ -54,6 +54,10 @@ const App: React.FC = () => {
       <style>{`.area-selected,[data-focus-visible-added] {
     outline: 2px solid #7B61FF;
     ${config.animated ? "outline: none;" : ""}
+    }
+    ${config.animated ? `*:focus {
+    outline: none;
+    }` : ""}
 }
  `}</style>
       <div
@@ -67,6 +71,7 @@ const App: React.FC = () => {
             style={{
               border: "1px solid",
               pointerEvents: "none",
+              willChange: 'left, top'
             }}
           />
         )}
