@@ -31,7 +31,7 @@ let lastItemVisited: HTMLElement | undefined;
  * Set the keydown event and create a new Navigator,
  * which will interact with the Stack
  */
-export interface NavigatorOptions extends Options {} 
+export type NavigatorOptions = Options;
 function initEventListener(options: Options): () => void {
   function keydownListener({ key }: { key: string }) {
     const stack = initStack();
