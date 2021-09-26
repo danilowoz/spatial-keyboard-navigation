@@ -1,5 +1,5 @@
 import { Fragment } from "react";
-import { Area, Anchor } from "spatial-focus-react";
+import { Area, Anchor } from "spatial-keyboard-navigation-react";
 import LIST from "./data";
 import ContextMenuDemo from "./ContextDemo";
 

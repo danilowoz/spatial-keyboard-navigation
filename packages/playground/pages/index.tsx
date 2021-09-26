@@ -1,4 +1,7 @@
-import { Provider, useNavigationContext } from "spatial-focus-react";
+import {
+  Provider,
+  useNavigationContext,
+} from "spatial-keyboard-navigation-react";
 import { motion, useAnimation } from "framer-motion";
 
 import "show-keys";
@@ -10,7 +13,11 @@ import { useEffect, useState } from "react";
 
 const App: React.FC = () => {
   const [currentItem, setCurrentItem] = useState(0);
-  const [config, setConfig] = useState({ area: false, animated: false, strictArea: false });
+  const [config, setConfig] = useState({
+    area: false,
+    animated: false,
+    strictArea: false,
+  });
   const controls = useAnimation();
 
   const { node } = useNavigationContext();
@@ -55,9 +62,13 @@ const App: React.FC = () => {
     outline: 2px solid #7B61FF;
     ${config.animated ? "outline: none;" : ""}
     }
-    ${config.animated ? `*:focus {
+    ${
+      config.animated
+        ? `*:focus {
     outline: none;
-    }` : ""}
+    }`
+        : ""
+    }
 }
  `}</style>
       <div
@@ -71,7 +82,7 @@ const App: React.FC = () => {
             style={{
               border: "1px solid",
               pointerEvents: "none",
-              willChange: 'left, top'
+              willChange: "left, top",
             }}
           />
         )}

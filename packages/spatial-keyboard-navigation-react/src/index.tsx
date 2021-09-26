@@ -1,5 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { initStack, initEventListener, UnitType, NavigatorOptions } from "spatial-focus";
+import {
+  initStack,
+  initEventListener,
+  UnitType,
+  NavigatorOptions,
+} from "spatial-keyboard-navigation";
 
 import React, {
   FC,
@@ -139,10 +144,16 @@ const useNavigationContext = (): NavigationContext => {
       setNavigationContext({ node: payload.detail.node });
     };
 
-    window.addEventListener("spatial-focus-navigate", handler as any);
+    window.addEventListener(
+      "spatial-keyboard-navigation-navigate",
+      handler as any
+    );
 
     return () => {
-      window.removeEventListener("spatial-focus-navigate", handler as any);
+      window.removeEventListener(
+        "spatial-keyboard-navigation-navigate",
+        handler as any
+      );
     };
   });
 
@@ -150,12 +161,19 @@ const useNavigationContext = (): NavigationContext => {
 };
 
 // @ts-ignore
-const Provider: React.FC<NavigatorOptions> = ({ children, areaClassName, strictArea }) => {
-  useEffect(function initEventListenerEffect() {
-    const remove = initEventListener({ areaClassName, strictArea });
+const Provider: React.FC<NavigatorOptions> = ({
+  children,
+  areaClassName,
+  strictArea,
+}) => {
+  useEffect(
+    function initEventListenerEffect() {
+      const remove = initEventListener({ areaClassName, strictArea });
 
-    return remove;
-  }, [areaClassName, strictArea]);
+      return remove;
+    },
+    [areaClassName, strictArea]
+  );
 
   return children;
 };

@@ -83,7 +83,7 @@ function initEventListener(options: Options): () => void {
 
     if (lastItemVisited) {
       window.dispatchEvent(
-        new CustomEvent("spatial-focus-navigate", {
+        new CustomEvent("spatial-keyboard-navigation-navigate", {
           detail: { node: lastItemVisited },
         })
       );

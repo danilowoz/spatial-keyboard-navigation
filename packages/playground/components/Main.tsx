@@ -1,5 +1,5 @@
 import LIST from "./data";
-import { Area, Anchor } from "spatial-focus-react";
+import { Area, Anchor } from "spatial-keyboard-navigation-react";
 import { Fragment } from "react";
 
 const Main: React.FC<{ currentItem: number; area?: boolean }> = ({

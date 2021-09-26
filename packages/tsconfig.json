@@ -1,4 +1,7 @@
 {
   "files": [],
-  "references": [{ "path": "spatial-focus" }, { "path": "spatial-focus-react" }]
+  "references": [
+    { "path": "spatial-keyboard-navigation" },
+    { "path": "spatial-keyboard-navigation-react" }
+  ]
 }

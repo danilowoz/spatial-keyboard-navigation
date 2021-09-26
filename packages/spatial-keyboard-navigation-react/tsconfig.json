@@ -8,5 +8,5 @@
     "esModuleInterop": true
   },
   "include": ["src"],
-  "references": [{ "path": "../spatial-focus" }]
+  "references": [{ "path": "../spatial-keyboard-navigation" }]
 }

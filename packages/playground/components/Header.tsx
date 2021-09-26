@@ -1,5 +1,5 @@
 import { Fragment } from "react";
-import { Anchor, Area } from "spatial-focus-react";
+import { Anchor, Area } from "spatial-keyboard-navigation-react";
 
 const Header: React.FC<{ area?: boolean }> = ({ area }) => {
   const MaybeArea = area ? Area : Fragment;

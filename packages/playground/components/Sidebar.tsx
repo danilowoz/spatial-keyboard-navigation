@@ -1,5 +1,5 @@
 import LIST from "./data";
-import { Area, Anchor } from "spatial-focus-react";
+import { Area, Anchor } from "spatial-keyboard-navigation-react";
 import { Fragment } from "react";
 
 const Sidebar: React.FC<{
@@ -79,7 +79,7 @@ const Sidebar: React.FC<{
           />
           Animated
         </label>
-        
+
         <label className="text-gray-500">
           <input
             type="checkbox"
@@ -91,7 +91,7 @@ const Sidebar: React.FC<{
           />
           Areas
         </label>
-        
+
         <label className="text-gray-500 block">
           <input
             type="checkbox"
