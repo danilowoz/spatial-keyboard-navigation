@@ -1,5 +1,7 @@
 # Spatial keyboard navigation
 
+[Example](https://spatial-keyboard-navigation.vercel.app/) - Use the arrow keys to navigate.
+
 > The following project is an experiment and it's still under exploration.
 
 ### Motivation
@@ -18,7 +20,7 @@ Graphical User Interface has already been using analogies from the real world on
 
 That said, putting all selectable elements in a visual hierarchy structure and using the arrow keys to navigate through them might be the easiest way to introduce this new concept, which works just like a spreadsheet.
 
-`Video`
+https://user-images.githubusercontent.com/4838076/136709247-42102aa2-6a3e-4e0c-9e4a-d6d65a1defd4.mp4
 
 This approach makes it easier and faster to navigate through the selectable elements, plus it doesn't introduce any new aspects and it doesn't require any new learnings from the users.
 
