@@ -1,5 +1,5 @@
 <h1 align="center">Spatial keyboard navigation</h1>
-<p align="center">A visual hierarchy approach to navigate throughs selectable elements on a page.</p>
+<p align="center">A visual hierarchy approach to navigate through selectable elements on a page.</p>
 <p align="center">
   <img src="https://user-images.githubusercontent.com/4838076/136709647-974a4307-a622-4f7e-b712-87f43b55fdce.gif" alt="spatia keyboard navigatio example" />
 </p>
