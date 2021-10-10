@@ -1,10 +1,10 @@
 <h1 align="center">Spatial keyboard navigation</h1>
-
+<p align="center">A visual hierarchy approach to navigate throughs selectable elements on a page.</p>
 <p align="center">
   <img src="https://user-images.githubusercontent.com/4838076/136709647-974a4307-a622-4f7e-b712-87f43b55fdce.gif" alt="spatia keyboard navigatio example" />
 </p>
 <p align="center">
-  <a href="https://spatial-keyboard-navigation.vercel.app/" rel="nofollow" target="_blank">Example - Use the arrow keys to navigate.</a> | <a href="#spatial-sensitive-keyboard-navigation">See full video</a>
+  <a href="https://spatial-keyboard-navigation.vercel.app/" rel="nofollow" target="_blank">Example: Use the arrow keys to navigate.</a> <a href="#spatial-sensitive-keyboard-navigation">See full video bellow.</a>
 </p>
 
 ### Motivation
