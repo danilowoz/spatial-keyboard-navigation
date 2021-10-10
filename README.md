@@ -18,7 +18,7 @@ Graphical User Interface has already been using analogies from the real world on
 
 That said, putting all selectable elements in a visual hierarchy structure and using the arrow keys to navigate through them might be the easiest way to introduce this new concept, which works just like a spreadsheet.
 
-<VIDEO>
+`Video`
 
 This approach makes it easier and faster to navigate through the selectable elements, plus it doesn't introduce any new aspects and it doesn't require any new learnings from the users.
 
