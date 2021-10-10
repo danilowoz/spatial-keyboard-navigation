@@ -1,18 +1,22 @@
 {
-    "previews": {
-        "3000": {
-            "name": "Playground",
-            "command": "yarn dev" 
-        }
-    },
-    "tasks": {
-        "setup": {
-            "name": "Install Dependencies",
-            "command": "yarn"
-        },
-        "dev": {
-            "name": "Development",
-            "command": "yarn dev"
-        }    
+  "previews": {
+    "3000": {
+      "name": "Playground",
+      "command": "yarn dev"
     }
+  },
+  "tasks": {
+    "setup": {
+      "name": "Install Dependencies",
+      "command": "yarn"
+    },
+    "dev": {
+      "name": "Development",
+      "command": "yarn dev"
+    },
+    "format": {
+      "name": "Prettier",
+      "command": "yarn format"
+    }
+  }
 }

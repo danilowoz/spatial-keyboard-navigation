@@ -13,7 +13,8 @@
     "build": "yarn tsc --build packages",
     "clean": "yarn lerna run clean --concurrency 4",
     "lint": "yarn lerna run lint --stream --concurrency 4",
-    "test": "yarn lerna run test --stream"
+    "test": "yarn lerna run test --stream",
+    "format": "prettier --write ."
   },
   "devDependencies": {
     "@commitlint/cli": "^12.1.1",
@@ -27,6 +28,7 @@
     "husky": "^3.1.0",
     "lerna": "^4.0.0",
     "lerna-changelog": "^1.0.1",
-    "rimraf": "^3.0.2"
+    "rimraf": "^3.0.2",
+    "prettier": "^2.4.1"
   }
 }
