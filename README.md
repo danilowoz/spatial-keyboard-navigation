@@ -1,10 +1,15 @@
-# Spatial keyboard navigation
+<h1 align="center">Spatial keyboard navigation</h1>
 
-[Example](https://spatial-keyboard-navigation.vercel.app/) - Use the arrow keys to navigate.
-
-> The following project is an experiment and it's still under exploration.
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/4838076/136709647-974a4307-a622-4f7e-b712-87f43b55fdce.gif" alt="spatia keyboard navigatio example" />
+</p>
+<p align="center">
+  <a href="https://spatial-keyboard-navigation.vercel.app/" rel="nofollow" target="_blank">Example - Use the arrow keys to navigate.</a> | <a href="#spatial-sensitive-keyboard-navigation">See full video</a>
+</p>
 
 ### Motivation
+
+> The following project is an experiment and it's still under exploration.
 
 The current way to navigate through selectable elements in a page hasn't changed much, and we are used to considering it the right way to navigate in a DOM document, but I'd like to bring a fresh perspective on this approach.
 
@@ -75,4 +80,5 @@ const Sidebar = () => {
 **Reference**
 
 [Zeh Fernandes](https://twitter.com/zehf)
+
 [https://en.wikipedia.org/wiki/Method_of_loci](https://en.wikipedia.org/wiki/Method_of_loci)
