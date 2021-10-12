@@ -15,7 +15,7 @@ const App: React.FC = () => {
   const [currentItem, setCurrentItem] = useState(0);
   const [config, setConfig] = useState({
     area: false,
-    animated: false,
+    animated: true,
     strictArea: false,
   });
   const controls = useAnimation();
